@@ -1,0 +1,27 @@
+Analyzing my_perfect_quran...                                   
+
+   info • Unnecessary braces in a string interpolation • lib/core/services/audio_service.dart:70:61 • unnecessary_brace_in_string_interps
+   info • Unnecessary braces in a string interpolation • lib/main.dart:61:13 • unnecessary_brace_in_string_interps
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/widgets/analysis_dialogs.dart:46:37 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/widgets/analysis_dialogs.dart:48:67 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/widgets/analysis_dialogs.dart:185:37 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/widgets/analysis_dialogs.dart:187:67 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/widgets/analysis_dialogs.dart:219:37 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/widgets/ayah_media_player.dart:64:35 • deprecated_member_use
+   info • Use 'const' with the constructor to improve performance • lib/widgets/ayah_media_player.dart:158:9 • prefer_const_constructors
+   info • Use 'const' literals as arguments to constructors of '@immutable' classes • lib/widgets/ayah_media_player.dart:160:21 • prefer_const_literals_to_create_immutables
+   info • Use 'const' with the constructor to improve performance • lib/widgets/ayah_media_player.dart:161:13 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/widgets/ayah_media_player.dart:162:13 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/widgets/ayah_media_player.dart:163:13 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/widgets/ayah_media_player.dart:164:13 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/widgets/ayah_media_player.dart:183:23 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/widgets/ayah_media_player.dart:183:49 • prefer_const_constructors
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/widgets/ayah_media_player.dart:218:62 • deprecated_member_use
+   info • Use 'const' for final variables initialized to a constant value • lib/widgets/renderer/interactive_qcf_page.dart:72:15 • prefer_const_declarations
+   info • Unnecessary braces in a string interpolation • test/audio_url_test.dart:16:56 • unnecessary_brace_in_string_interps
+   info • Don't invoke 'print' in production code • test/qcf_spacing_test.dart:7:5 • avoid_print
+   info • Don't invoke 'print' in production code • test/qcf_spacing_test.dart:9:9 • avoid_print
+   info • Don't invoke 'print' in production code • test/qcf_test.dart:11:5 • avoid_print
+   info • Don't invoke 'print' in production code • test/qcf_test.dart:13:9 • avoid_print
+
+23 issues found. (ran in 4.7s)
