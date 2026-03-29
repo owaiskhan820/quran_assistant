@@ -24,8 +24,8 @@ class InteractivePageviewQuran extends StatefulWidget {
     this.controller,
     this.onPageChanged,
     this.fontSize,
-    this.sp = 1,
-    this.h = 1,
+    this.sp = 0.9,
+    this.h = 1.05,
     this.theme,
     this.textColor = const Color(0xFF000000),
     this.pageBackgroundColor = const Color(0xFFFFFFFF),
@@ -69,24 +69,26 @@ class _InteractivePageviewQuranState extends State<InteractivePageviewQuran> {
       textDirection: TextDirection.rtl,
       child: Container(
         color: widget.theme?.pageBackgroundColor ?? widget.pageBackgroundColor,
-        child: PageView.builder(
-          physics: widget.physics,
-          controller: _controller,
-          reverse: false,
-          itemCount: 604,
-          onPageChanged: (index) => widget.onPageChanged?.call(index + 1),
-          itemBuilder: (context, index) {
-            final pageNumber = index + 1;
-            return InteractiveQcfPage(
-              pageNumber: pageNumber,
-              fontSize: widget.fontSize,
-              onWordTap: widget.onWordTap,
-              onAyahTap: widget.onAyahTap,
-              sp: widget.sp,
-              h: widget.h,
-              theme: effectiveTheme,
-            );
-          },
+        child: SizedBox.expand(
+          child: PageView.builder(
+            physics: widget.physics,
+            controller: _controller,
+            reverse: false,
+            itemCount: 604,
+            onPageChanged: (index) => widget.onPageChanged?.call(index + 1),
+            itemBuilder: (context, index) {
+              final pageNumber = index + 1;
+              return InteractiveQcfPage(
+                pageNumber: pageNumber,
+                fontSize: widget.fontSize,
+                onWordTap: widget.onWordTap,
+                onAyahTap: widget.onAyahTap,
+                sp: widget.sp,
+                h: widget.h,
+                theme: effectiveTheme,
+              );
+            },
+          ),
         ),
       ),
     );

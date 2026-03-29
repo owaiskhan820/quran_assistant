@@ -10,6 +10,9 @@ class MushafView extends StatelessWidget {
   final (int, int)? highlightedAyah;
   final void Function(int surah, int verse)? onAyahLongPress;
 
+  final double sp; 
+  final double h;
+
   const MushafView({
     super.key, 
     required this.initialPage, 
@@ -17,6 +20,8 @@ class MushafView extends StatelessWidget {
     this.controller,
     this.highlightedAyah,
     this.onAyahLongPress,
+    this.sp = 0.85, 
+    this.h = 0.94,
   });
 
   void _showWordDialog(BuildContext context, int surah, int verse, String word, String font, int wordIndex) {
@@ -48,8 +53,8 @@ class MushafView extends StatelessWidget {
       initialPageNumber: initialPage,
       controller: controller,
       onPageChanged: onPageChanged,
-      sp: 1.0,
-      h: 1.0,
+      sp: sp, // This fixes the width scaling
+      h: h,   // This fixes the 15-line height
       theme: QcfThemeData(
         pageBackgroundColor: Colors.white,
         verseTextColor: Colors.black,

@@ -17,8 +17,8 @@ class InteractiveQcfPage extends StatefulWidget {
     required this.pageNumber,
     this.theme = const QcfThemeData(),
     this.fontSize,
-    this.sp = 1.0,
-    this.h = 1.0,
+    this.sp = 0.9,
+    this.h = 1.05,
     this.onWordTap,
     this.onAyahTap,
     this.onAyahLongPress,
@@ -61,16 +61,7 @@ class _InteractiveQcfPageState extends State<InteractiveQcfPage> {
 
   List<InlineSpan> _buildSpans() {
     final ranges = getPageData(widget.pageNumber);
-    final screenSize = MediaQuery.of(context).size;
-    final isPortrait = MediaQuery.of(context).orientation == Orientation.portrait;
     final verseSpans = <InlineSpan>[];
-
-    // Add top padding for first two pages (traditional layout)
-    if (widget.pageNumber == 2 || widget.pageNumber == 1) {
-      verseSpans.add(
-        WidgetSpan(child: SizedBox(height: screenSize.height * .175)),
-      );
-    }
 
     for (final r in ranges) {
       final surah = int.parse(r['surah'].toString());
@@ -178,7 +169,7 @@ class _InteractiveQcfPageState extends State<InteractiveQcfPage> {
                   fontFamily: _pageFont,
                   package: 'qcf_quran',
                   color: widget.theme.verseNumberColor,
-                  fontSize: isPortrait ? _baseFontSize : _baseFontSize,
+                  fontSize: _baseFontSize,
                   height: widget.theme.verseNumberHeight * widget.h,
                   backgroundColor: widget.theme.verseBackgroundColor?.call(surah, v),
                 ),
@@ -215,37 +206,22 @@ class _InteractiveQcfPageState extends State<InteractiveQcfPage> {
       return Center(child: Text('Invalid page number: ${widget.pageNumber}'));
     }
 
-    final screenSize = MediaQuery.of(context).size;
-    final isPortrait = MediaQuery.of(context).orientation == Orientation.portrait;
-
-    return SingleChildScrollView(
-      child: SizedBox(
-        height: screenSize.height,
-        width: screenSize.width,
-        child: Padding(
-          padding: EdgeInsets.zero,
-          child: Text.rich(
-            TextSpan(children: _cachedSpans ?? []),
-            locale: const Locale("ar"),
-            textAlign: TextAlign.center,
-            textDirection: TextDirection.rtl,
-            style: TextStyle(
-              fontFamily: _pageFont,
-              package: 'qcf_quran',
-              fontSize: isPortrait
-                  ? _baseFontSize
-                  : (widget.pageNumber == 1 || widget.pageNumber == 2)
-                      ? 20 * widget.sp
-                      : _baseFontSize - (17 * widget.sp),
-              color: widget.theme.verseTextColor,
-              height: isPortrait
-                  ? (widget.pageNumber == 1 || widget.pageNumber == 2)
-                      ? 2.2 * widget.h
-                      : widget.theme.verseHeight * widget.h
-                  : 4 * widget.h,
-              letterSpacing: widget.theme.letterSpacing,
-              wordSpacing: widget.theme.wordSpacing,
-            ),
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        child: Text.rich(
+          TextSpan(children: _cachedSpans ?? []),
+          locale: const Locale("ar"),
+          textAlign: TextAlign.center,
+          textDirection: TextDirection.rtl,
+          style: TextStyle(
+            fontFamily: _pageFont,
+            package: 'qcf_quran',
+            fontSize: _baseFontSize,
+            color: widget.theme.verseTextColor,
+            height: widget.theme.verseHeight * widget.h,
+            letterSpacing: widget.theme.letterSpacing,
+            wordSpacing: widget.theme.wordSpacing,
           ),
         ),
       ),

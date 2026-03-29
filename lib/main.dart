@@ -48,13 +48,14 @@ class _MyQuranAppState extends State<MyQuranApp> {
               : null,
           builder: (context, child) {
             return Stack(
+              fit: StackFit.expand,
               children: [
                 if (child != null) child,
                 // Bar is now permanently visible and doesn't hide
-                const Align(
-                  alignment: Alignment.bottomCenter,
-                  child: PersistentBottomBar(),
-                ),
+                // const Align(
+                //   alignment: Alignment.bottomCenter,
+                //   child: PersistentBottomBar(),
+                // ),
               ],
             );
           },
@@ -130,14 +131,14 @@ class _QuranPageState extends State<QuranPage> {
 
   @override
   Widget build(BuildContext context) {
-    final double headerH = 8.h * 2 + 14.sp + 0.5;
+    final double headerH = 8.h * 2 + 12.sp + 0.5;
 
     final mainContent = Stack(
       children: [
         Positioned(
-          top: headerH,
-          left: 0,
-          right: 0,
+          top: headerH + 10.h,
+          left: -5,
+          right: -5,
           bottom: 0,
           child: GestureDetector(
             onTap: () {
@@ -146,7 +147,7 @@ class _QuranPageState extends State<QuranPage> {
               }
             },
             child: MushafView(
-              initialPage: 1,
+              initialPage: 3,
               controller: _pageController,
               highlightedAyah: _highlightedAyah,
               onPageChanged: (page) {
