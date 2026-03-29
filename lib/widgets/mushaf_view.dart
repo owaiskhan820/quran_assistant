@@ -7,12 +7,16 @@ class MushafView extends StatelessWidget {
   final int initialPage;
   final Function(int) onPageChanged;
   final PageController? controller;
+  final (int, int)? highlightedAyah;
+  final void Function(int surah, int verse)? onAyahLongPress;
 
   const MushafView({
     super.key, 
     required this.initialPage, 
     required this.onPageChanged,
     this.controller,
+    this.highlightedAyah,
+    this.onAyahLongPress,
   });
 
   void _showWordDialog(BuildContext context, int surah, int verse, String word, String font, int wordIndex) {
@@ -50,10 +54,18 @@ class MushafView extends StatelessWidget {
         pageBackgroundColor: Colors.white,
         verseTextColor: Colors.black,
         verseNumberColor: const Color(0xFF1E5B30),
-        verseBackgroundColor: (surah, verse) => Colors.transparent,
+        verseBackgroundColor: (surah, verse) {
+          if (highlightedAyah != null && 
+              highlightedAyah!.$1 == surah && 
+              highlightedAyah!.$2 == verse) {
+            return Colors.yellow.withOpacity(0.3);
+          }
+          return Colors.transparent;
+        },
       ),
       onWordTap: (surah, verse, word, font, wordIndex) => _showWordDialog(context, surah, verse, word, font, wordIndex),
       onAyahTap: (surah, verse) => _showAyahDialog(context, surah, verse),
+      onAyahLongPress: onAyahLongPress,
     );
   }
 }

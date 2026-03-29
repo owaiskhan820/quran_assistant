@@ -1,35 +1,64 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_perfect_quran/widgets/mushaf_view.dart';
 import 'package:my_perfect_quran/widgets/mushaf_header.dart';
-import 'package:my_perfect_quran/widgets/selection_dialogs.dart'; // Import selection dialogs
+import 'package:my_perfect_quran/widgets/selection_dialogs.dart'; 
 import 'package:my_perfect_quran/widgets/ayah_media_player.dart';
 import 'package:my_perfect_quran/helpers/desktop_helper.dart';
-import 'package:qcf_quran/qcf_quran.dart'; // Import package for data
+import 'package:my_perfect_quran/widgets/persistent_bottom_bar.dart';
+import 'package:my_perfect_quran/services/ai_service.dart';
+import 'package:qcf_quran/qcf_quran.dart';
+import 'package:my_perfect_quran/core/navigation.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
   // Initialize desktop settings (ignored on mobile)
   await DesktopHelper.init();
+  
+  // Load environment variables
+  await dotenv.load(fileName: ".env");
+
+  // Initialize AIService
+  AIService().init();
 
   runApp(const MyQuranApp());
 }
-class MyQuranApp extends StatelessWidget {
+
+class MyQuranApp extends StatefulWidget {
   const MyQuranApp({super.key});
 
+  @override
+  State<MyQuranApp> createState() => _MyQuranAppState();
+}
+
+class _MyQuranAppState extends State<MyQuranApp> {
   @override
   Widget build(BuildContext context) {
     return ScreenUtilInit(
       designSize: const Size(360, 690),
       builder: (context, child) {
         return MaterialApp(
+          navigatorKey: navigatorKey,
           debugShowCheckedModeBanner: false,
           scrollBehavior: Platform.isLinux
               ? const MaterialScrollBehavior().copyWith(scrollbars: false)
               : null,
-          home: const QuranPage(),
+          builder: (context, child) {
+            return Stack(
+              children: [
+                if (child != null) child,
+                // Bar is now permanently visible and doesn't hide
+                const Align(
+                  alignment: Alignment.bottomCenter,
+                  child: PersistentBottomBar(),
+                ),
+              ],
+            );
+          },
+          home: QuranPage(key: quranPageKey),
         );
       },
     );
@@ -46,15 +75,24 @@ class QuranPage extends StatefulWidget {
 class _QuranPageState extends State<QuranPage> {
   int currentPage = 1;
   final PageController _pageController = PageController();
+  (int, int)? _highlightedAyah;
 
-  void _onSearchPage(int page) {
+  void onSearchPage(int page) {
     if (page < 1 || page > 604) return;
     _pageController.jumpToPage(page - 1);
-    setState(() => currentPage = page);
+    setState(() {
+      currentPage = page;
+      _highlightedAyah = null; // Clear highlight on page jump unless specified
+    });
+  }
+
+  void onHighlightAyah(int surah, int ayah) {
+    setState(() {
+      _highlightedAyah = (surah, ayah);
+    });
   }
 
   String get _currentSurahName {
-    // Page index to surah number from package data
     final data = getPageData(currentPage);
     if (data.isEmpty) return "Unknown";
     final surahNum = data[0]['surah'];
@@ -62,7 +100,6 @@ class _QuranPageState extends State<QuranPage> {
   }
 
   String get _currentJuzInfo {
-    // We can use the juzStartPages from SelectionDialogs or calculate
     const juzStartPages = [
       1, 22, 42, 62, 82, 102, 122, 142, 162, 182,
       202, 222, 242, 262, 282, 302, 322, 342, 362, 382,
@@ -77,6 +114,14 @@ class _QuranPageState extends State<QuranPage> {
     return "Juz $currentJuz";
   }
 
+  void onSearchAndHighlight(int page, int surah, int ayah) {
+    _pageController.jumpToPage(page - 1);
+    setState(() {
+      currentPage = page;
+      _highlightedAyah = (surah, ayah);
+    });
+  }
+
   @override
   void dispose() {
     _pageController.dispose();
@@ -85,31 +130,36 @@ class _QuranPageState extends State<QuranPage> {
 
   @override
   Widget build(BuildContext context) {
-    // Header height: vertical padding (8.h * 2) + text (14.sp) + border (0.5)
-    // We measure it safely from the design system
     final double headerH = 8.h * 2 + 14.sp + 0.5;
 
     final mainContent = Stack(
       children: [
-        // 1. THE MUSHAF VIEW — starts below the header, fills the rest
         Positioned(
           top: headerH,
           left: 0,
           right: 0,
           bottom: 0,
-          child: MushafView(
-            initialPage: 1,
-            controller: _pageController,
-            onPageChanged: (page) {
-              setState(() {
-                currentPage = page;
-              });
-              debugPrint("Current Page: $page");
+          child: GestureDetector(
+            onTap: () {
+              if (_highlightedAyah != null) {
+                setState(() => _highlightedAyah = null);
+              }
             },
+            child: MushafView(
+              initialPage: 1,
+              controller: _pageController,
+              highlightedAyah: _highlightedAyah,
+              onPageChanged: (page) {
+                setState(() {
+                  currentPage = page;
+                });
+              },
+              onAyahLongPress: (surah, ayah) {
+                setState(() => _highlightedAyah = (surah, ayah));
+              },
+            ),
           ),
         ),
-
-        // 2. THE HEADER — floats at the top
         Positioned(
           top: 0,
           left: 0,
@@ -118,20 +168,20 @@ class _QuranPageState extends State<QuranPage> {
             pageNumber: currentPage,
             surahName: _currentSurahName,
             juzInfo: _currentJuzInfo,
-            onSearchPage: _onSearchPage,
+            onSearchPage: onSearchPage,
             onSurahTap: () async {
               final result = await showDialog<int>(
                 context: context,
                 builder: (_) => const SurahSelectionDialog(),
               );
-              if (result != null) _onSearchPage(result);
+              if (result != null) onSearchPage(result);
             },
             onJuzTap: () async {
               final result = await showDialog<int>(
                 context: context,
                 builder: (_) => const JuzSelectionDialog(),
               );
-              if (result != null) _onSearchPage(result);
+              if (result != null) onSearchPage(result);
             },
           ),
         ),

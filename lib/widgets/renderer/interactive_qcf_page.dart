@@ -10,6 +10,7 @@ class InteractiveQcfPage extends StatefulWidget {
   final double h;
   final void Function(int surah, int verse, String word, String font, int wordIndex)? onWordTap;
   final void Function(int surah, int verse)? onAyahTap;
+  final void Function(int surah, int verse)? onAyahLongPress;
 
   const InteractiveQcfPage({
     super.key,
@@ -20,6 +21,7 @@ class InteractiveQcfPage extends StatefulWidget {
     this.h = 1.0,
     this.onWordTap,
     this.onAyahTap,
+    this.onAyahLongPress,
   });
 
   @override
@@ -60,6 +62,7 @@ class _InteractiveQcfPageState extends State<InteractiveQcfPage> {
   List<InlineSpan> _buildSpans() {
     final ranges = getPageData(widget.pageNumber);
     final screenSize = MediaQuery.of(context).size;
+    final isPortrait = MediaQuery.of(context).orientation == Orientation.portrait;
     final verseSpans = <InlineSpan>[];
 
     // Add top padding for first two pages (traditional layout)
@@ -141,8 +144,17 @@ class _InteractiveQcfPageState extends State<InteractiveQcfPage> {
                 ..onTap = () {
                   widget.onWordTap?.call(surah, v, word, _pageFont, wordIndex);
                 },
+              style: TextStyle(
+                backgroundColor: widget.theme.verseBackgroundColor?.call(surah, v),
+              ),
               children: [
-                if (i < charList.length - 1) const TextSpan(text: ' '),
+                if (i < charList.length - 1) 
+                  TextSpan(
+                    text: ' ',
+                    style: TextStyle(
+                      backgroundColor: widget.theme.verseBackgroundColor?.call(surah, v),
+                    ),
+                  ),
               ],
             ),
           );
@@ -151,29 +163,47 @@ class _InteractiveQcfPageState extends State<InteractiveQcfPage> {
         // 3. Ayah End Sign (Verse Number)
         InlineSpan verseNumberSpan;
         final verseNumGlyph = getVerseNumberQCF(surah, v);
-        final ayahRecognizer = TapGestureRecognizer()
-          ..onTap = () {
-            widget.onAyahTap?.call(surah, v);
-          };
 
         if (widget.theme.verseNumberBuilder != null) {
           verseNumberSpan = widget.theme.verseNumberBuilder!(surah, v, verseNumGlyph);
         } else {
-          verseNumberSpan = TextSpan(
-            text: verseNumGlyph,
-            recognizer: ayahRecognizer,
-            style: TextStyle(
-              fontFamily: _pageFont,
-              package: 'qcf_quran',
-              color: widget.theme.verseNumberColor,
-              height: widget.theme.verseNumberHeight * widget.h,
+          verseNumberSpan = WidgetSpan(
+            alignment: PlaceholderAlignment.middle,
+            child: GestureDetector(
+              onTap: () => widget.onAyahTap?.call(surah, v),
+              onLongPress: () => widget.onAyahLongPress?.call(surah, v),
+              child: Text(
+                verseNumGlyph,
+                style: TextStyle(
+                  fontFamily: _pageFont,
+                  package: 'qcf_quran',
+                  color: widget.theme.verseNumberColor,
+                  fontSize: isPortrait ? _baseFontSize : _baseFontSize,
+                  height: widget.theme.verseNumberHeight * widget.h,
+                  backgroundColor: widget.theme.verseBackgroundColor?.call(surah, v),
+                ),
+              ),
             ),
           );
         }
 
-        verseSpans.add(const TextSpan(text: ' '));
+        verseSpans.add(
+          TextSpan(
+            text: ' ',
+            style: TextStyle(
+              backgroundColor: widget.theme.verseBackgroundColor?.call(surah, v),
+            ),
+          ),
+        );
         verseSpans.add(verseNumberSpan);
-        verseSpans.add(const TextSpan(text: ' '));
+        verseSpans.add(
+          TextSpan(
+            text: ' ',
+            style: TextStyle(
+              backgroundColor: widget.theme.verseBackgroundColor?.call(surah, v),
+            ),
+          ),
+        );
       }
     }
     return verseSpans;

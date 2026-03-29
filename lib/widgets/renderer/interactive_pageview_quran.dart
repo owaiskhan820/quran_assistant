@@ -16,6 +16,7 @@ class InteractivePageviewQuran extends StatefulWidget {
   
   final void Function(int surah, int verse, String word, String font, int wordIndex)? onWordTap;
   final void Function(int surah, int verse)? onAyahTap;
+  final void Function(int surah, int verse)? onAyahLongPress;
 
   const InteractivePageviewQuran({
     super.key,
@@ -31,6 +32,7 @@ class InteractivePageviewQuran extends StatefulWidget {
     this.physics,
     this.onWordTap,
     this.onAyahTap,
+    this.onAyahLongPress,
   }) : assert(initialPageNumber >= 1 && initialPageNumber <= 604);
 
   @override
