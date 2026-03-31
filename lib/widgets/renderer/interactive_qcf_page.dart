@@ -6,8 +6,9 @@ class InteractiveQcfPage extends StatefulWidget {
   final int pageNumber;
   final QcfThemeData theme;
   final double? fontSize;
-  final double sp;
-  final double h;
+  final double fontScale;
+  final double heightScale;
+  final (int, int)? highlightedAyah;
   final void Function(int surah, int verse, String word, String font, int wordIndex)? onWordTap;
   final void Function(int surah, int verse)? onAyahTap;
   final void Function(int surah, int verse)? onAyahLongPress;
@@ -17,8 +18,9 @@ class InteractiveQcfPage extends StatefulWidget {
     required this.pageNumber,
     this.theme = const QcfThemeData(),
     this.fontSize,
-    this.sp = 0.9,
-    this.h = 1.05,
+    this.fontScale = 0.9,
+    this.heightScale = 1.05,
+    this.highlightedAyah,
     this.onWordTap,
     this.onAyahTap,
     this.onAyahLongPress,
@@ -43,9 +45,10 @@ class _InteractiveQcfPageState extends State<InteractiveQcfPage> {
   void didUpdateWidget(InteractiveQcfPage oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.pageNumber != widget.pageNumber ||
-        oldWidget.sp != widget.sp ||
-        oldWidget.h != widget.h ||
-        oldWidget.theme != widget.theme) {
+        oldWidget.fontScale != widget.fontScale ||
+        oldWidget.heightScale != widget.heightScale ||
+        oldWidget.theme != widget.theme ||
+        oldWidget.highlightedAyah != widget.highlightedAyah) {
       _cachedSpans = null;
       _initData();
     }
@@ -53,7 +56,7 @@ class _InteractiveQcfPageState extends State<InteractiveQcfPage> {
 
   void _initData() {
     _pageFont = "QCF_P${widget.pageNumber.toString().padLeft(3, '0')}";
-    _baseFontSize = getFontSize(widget.pageNumber, context) * widget.sp;
+    _baseFontSize = getFontSize(widget.pageNumber, context) * widget.fontScale;
     if (_cachedSpans == null) {
       _cachedSpans = _buildSpans();
     }
@@ -111,8 +114,8 @@ class _InteractiveQcfPageState extends State<InteractiveQcfPage> {
                     fontFamily: "QCF_P001",
                     package: 'qcf_quran',
                     fontSize: getScreenType(context) == ScreenType.large
-                        ? widget.theme.basmalaFontSizeLarge * widget.sp
-                        : widget.theme.basmalaFontSizeSmall * widget.sp,
+                        ? widget.theme.basmalaFontSizeLarge * widget.fontScale
+                        : widget.theme.basmalaFontSizeSmall * widget.fontScale,
                     color: widget.theme.basmalaColor,
                   ),
                 ),
@@ -124,6 +127,14 @@ class _InteractiveQcfPageState extends State<InteractiveQcfPage> {
         // 2. Word-by-word text rendering
         String verseText = getVerseQCF(surah, v, verseEndSymbol: false);
         final charList = verseText.replaceAll(RegExp(r'\s+'), '').split('');
+        
+        final isHighlighted = widget.highlightedAyah != null &&
+            widget.highlightedAyah!.$1 == surah &&
+            widget.highlightedAyah!.$2 == v;
+        final bgColor = isHighlighted 
+            ? Colors.yellow.withValues(alpha: 0.3) 
+            : widget.theme.verseBackgroundColor?.call(surah, v);
+
         for (int i = 0; i < charList.length; i++) {
           final word = charList[i];
           final wordIndex = i + 1;
@@ -136,14 +147,14 @@ class _InteractiveQcfPageState extends State<InteractiveQcfPage> {
                   widget.onWordTap?.call(surah, v, word, _pageFont, wordIndex);
                 },
               style: TextStyle(
-                backgroundColor: widget.theme.verseBackgroundColor?.call(surah, v),
+                backgroundColor: bgColor,
               ),
               children: [
                 if (i < charList.length - 1) 
                   TextSpan(
                     text: ' ',
                     style: TextStyle(
-                      backgroundColor: widget.theme.verseBackgroundColor?.call(surah, v),
+                      backgroundColor: bgColor,
                     ),
                   ),
               ],
@@ -170,8 +181,8 @@ class _InteractiveQcfPageState extends State<InteractiveQcfPage> {
                   package: 'qcf_quran',
                   color: widget.theme.verseNumberColor,
                   fontSize: _baseFontSize,
-                  height: widget.theme.verseNumberHeight * widget.h,
-                  backgroundColor: widget.theme.verseBackgroundColor?.call(surah, v),
+                  height: widget.theme.verseNumberHeight * widget.heightScale,
+                  backgroundColor: bgColor,
                 ),
               ),
             ),
@@ -182,7 +193,7 @@ class _InteractiveQcfPageState extends State<InteractiveQcfPage> {
           TextSpan(
             text: ' ',
             style: TextStyle(
-              backgroundColor: widget.theme.verseBackgroundColor?.call(surah, v),
+              backgroundColor: bgColor,
             ),
           ),
         );
@@ -191,7 +202,7 @@ class _InteractiveQcfPageState extends State<InteractiveQcfPage> {
           TextSpan(
             text: ' ',
             style: TextStyle(
-              backgroundColor: widget.theme.verseBackgroundColor?.call(surah, v),
+              backgroundColor: bgColor,
             ),
           ),
         );
@@ -207,22 +218,19 @@ class _InteractiveQcfPageState extends State<InteractiveQcfPage> {
     }
 
     return Center(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-        child: Text.rich(
-          TextSpan(children: _cachedSpans ?? []),
-          locale: const Locale("ar"),
-          textAlign: TextAlign.center,
-          textDirection: TextDirection.rtl,
-          style: TextStyle(
-            fontFamily: _pageFont,
-            package: 'qcf_quran',
-            fontSize: _baseFontSize,
-            color: widget.theme.verseTextColor,
-            height: widget.theme.verseHeight * widget.h,
-            letterSpacing: widget.theme.letterSpacing,
-            wordSpacing: widget.theme.wordSpacing,
-          ),
+      child: Text.rich(
+        TextSpan(children: _cachedSpans ?? []),
+        locale: const Locale("ar"),
+        textAlign: TextAlign.center,
+        textDirection: TextDirection.rtl,
+        style: TextStyle(
+          fontFamily: _pageFont,
+          package: 'qcf_quran',
+          fontSize: _baseFontSize,
+          color: widget.theme.verseTextColor,
+          height: widget.theme.verseHeight * widget.heightScale,
+          letterSpacing: widget.theme.letterSpacing,
+          wordSpacing: widget.theme.wordSpacing,
         ),
       ),
     );

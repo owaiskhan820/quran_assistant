@@ -27,7 +27,7 @@ class AudioService {
     });
 
     _player.playbackEventStream.listen((event) {}, onError: (Object e, StackTrace st) {
-       debugPrint('Audio player error: $e');
+
     });
   }
 
@@ -62,7 +62,7 @@ class AudioService {
       // Use a full URL check
       final fullUrl = url.startsWith('http') ? url : "https://mirrors.quranicaudio.com/everyayah/$url";
       
-      debugPrint("Playing ayah audio: $fullUrl");
+
       
       // Don't call await _player.stop() here; it's redundant and slow.
       // just_audio handles the transition better if you just call setUrl.
@@ -70,7 +70,7 @@ class AudioService {
       _player.play(); // No 'await' here to keep the UI snappy
     }
   } catch (e) {
-    debugPrint("Error playing ayah audio ($surah:$ayah): $e");
+    // ignore empty catch
   }
 }
   
@@ -89,13 +89,13 @@ class AudioService {
       }
 
       final url = "https://audio.qurancdn.com/wbw/${s}_${a}_${w}.mp3";
-      debugPrint("Playing word audio: $url");
+
       
       await _player.stop();
       await _player.setUrl(url);
       await _player.play();
     } catch (e) {
-      debugPrint("Error playing word audio ($surah:$ayah:$wordIndex): $e");
+      // ignore empty catch
     }
   }
 

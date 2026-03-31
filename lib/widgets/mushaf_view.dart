@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:qcf_quran/qcf_quran.dart';
 import 'package:my_perfect_quran/widgets/renderer/interactive_pageview_quran.dart';
 import 'package:my_perfect_quran/widgets/analysis_dialogs.dart';
+import 'package:my_perfect_quran/core/navigation/nav_controller.dart';
 
 class MushafView extends StatelessWidget {
   final int initialPage;
@@ -10,8 +11,8 @@ class MushafView extends StatelessWidget {
   final (int, int)? highlightedAyah;
   final void Function(int surah, int verse)? onAyahLongPress;
 
-  final double sp; 
-  final double h;
+  final double fontScale; 
+  final double heightScale;
 
   const MushafView({
     super.key, 
@@ -20,11 +21,12 @@ class MushafView extends StatelessWidget {
     this.controller,
     this.highlightedAyah,
     this.onAyahLongPress,
-    this.sp = 0.85, 
-    this.h = 0.94,
+    this.fontScale = 0.85, 
+    this.heightScale = 0.94,
   });
 
   void _showWordDialog(BuildContext context, int surah, int verse, String word, String font, int wordIndex) {
+    showBottomNavNotifier.value = true;
     showDialog(
       context: context,
       builder: (context) => WordAnalysisDialog(
@@ -38,6 +40,7 @@ class MushafView extends StatelessWidget {
   }
 
   void _showAyahDialog(BuildContext context, int surah, int verse) {
+    showBottomNavNotifier.value = true;
     showDialog(
       context: context,
       builder: (context) => AyahAnalysisDialog(
@@ -53,20 +56,13 @@ class MushafView extends StatelessWidget {
       initialPageNumber: initialPage,
       controller: controller,
       onPageChanged: onPageChanged,
-      sp: sp, // This fixes the width scaling
-      h: h,   // This fixes the 15-line height
-      theme: QcfThemeData(
+      fontScale: fontScale, // This fixes the width scaling
+      heightScale: heightScale,   // This fixes the 15-line height
+      highlightedAyah: highlightedAyah,
+      theme: const QcfThemeData(
         pageBackgroundColor: Colors.white,
         verseTextColor: Colors.black,
-        verseNumberColor: const Color(0xFF1E5B30),
-        verseBackgroundColor: (surah, verse) {
-          if (highlightedAyah != null && 
-              highlightedAyah!.$1 == surah && 
-              highlightedAyah!.$2 == verse) {
-            return Colors.yellow.withOpacity(0.3);
-          }
-          return Colors.transparent;
-        },
+        verseNumberColor: Color(0xFF1E5B30),
       ),
       onWordTap: (surah, verse, word, font, wordIndex) => _showWordDialog(context, surah, verse, word, font, wordIndex),
       onAyahTap: (surah, verse) => _showAyahDialog(context, surah, verse),

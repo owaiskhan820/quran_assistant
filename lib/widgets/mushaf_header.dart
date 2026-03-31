@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:my_perfect_quran/widgets/search_dialog.dart';
+import 'package:my_perfect_quran/core/navigation/nav_controller.dart';
 
 class MushafHeader extends StatelessWidget {
-  final int pageNumber;
   final String surahName;
   final String juzInfo;
   final Function(int) onSearchPage;
@@ -12,7 +11,6 @@ class MushafHeader extends StatelessWidget {
 
   const MushafHeader({
     super.key,
-    required this.pageNumber,
     required this.surahName,
     required this.juzInfo,
     required this.onSearchPage,
@@ -36,18 +34,6 @@ class MushafHeader extends StatelessWidget {
           _HeaderButton(
             label: surahName,
             onTap: onSurahTap,
-          ),
-          _HeaderButton(
-            label: pageNumber.toString(),
-            onTap: () async {
-              final result = await showDialog<int>(
-                context: context,
-                builder: (_) => const MushafSearchDialog(),
-              );
-              if (result != null) {
-                onSearchPage(result);
-              }
-            },
           ),
           _HeaderButton(
             label: juzInfo,

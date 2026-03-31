@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'dart:typed_data';
+
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:flutter/foundation.dart';
@@ -41,7 +41,7 @@ class AIService {
       final response = await _model.generateContent(content);
       final text = response.text;
 
-      debugPrint("DEBUG: Gemini Raw Response: $text");
+
 
       if (text == null || text.isEmpty) {
         throw Exception("Gemini returned an empty response.");
@@ -80,7 +80,7 @@ class AIService {
         throw Exception("Invalid JSON format from AI: $e\nResponse: $jsonString");
       }
     } catch (e) {
-      debugPrint('DEBUG: AIService error details: $e');
+
       rethrow; // Rethrow to let the UI handle specific messages
     }
   }

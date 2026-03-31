@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_perfect_quran/core/services/audio_service.dart';
-import 'package:my_perfect_quran/core/services/quran_api_service.dart';
+import 'package:my_perfect_quran/widgets/translation_view.dart';
 
 class WordAnalysisDialog extends StatefulWidget {
   final String word;
@@ -31,21 +31,25 @@ class _WordAnalysisDialogState extends State<WordAnalysisDialog> {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.r)),
-      backgroundColor: const Color(0xFFFBF1E6),
+      backgroundColor: Colors.transparent,
+      insetPadding: EdgeInsets.symmetric(horizontal: 20.w),
       child: Container(
-        width: 300.w,
-        height: 300.w, // Ensure it's square
-        padding: EdgeInsets.all(16.w),
+        height: 0.35.sh,
+        width: double.infinity,
+        decoration: BoxDecoration(
+          color: const Color(0xFFF8F4ED),
+          borderRadius: BorderRadius.circular(28.r),
+        ),
+        padding: EdgeInsets.all(20.w),
         child: Column(
           children: [
             // Top Dropdown
             Container(
               padding: EdgeInsets.symmetric(horizontal: 12.w),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.5),
-                borderRadius: BorderRadius.circular(10.r),
-                border: Border.all(color: const Color(0xFF1E5B30).withOpacity(0.3)),
+                color: Colors.black.withValues(alpha: 0.03),
+                borderRadius: BorderRadius.circular(12.r),
+                border: Border.all(color: const Color(0xFF1E5B30).withValues(alpha: 0.1)),
               ),
               child: DropdownButtonHideUnderline(
                 child: DropdownButton<String>(
@@ -64,7 +68,6 @@ class _WordAnalysisDialogState extends State<WordAnalysisDialog> {
                   onChanged: (String? newValue) {
                     if (newValue != null) {
                       setState(() => _selectedOption = newValue);
-                      debugPrint("Option tapped: $newValue");
                     }
                   },
                 ),
@@ -78,7 +81,7 @@ class _WordAnalysisDialogState extends State<WordAnalysisDialog> {
               style: TextStyle(
                 fontFamily: widget.fontFamily,
                 package: 'qcf_quran',
-                fontSize: 42.sp, // Reduced font size
+                fontSize: 48.sp,
                 color: Colors.black,
               ),
             ),
@@ -110,15 +113,15 @@ class _WordAnalysisDialogState extends State<WordAnalysisDialog> {
                     )
                   : const Icon(Icons.play_arrow, color: Colors.white, size: 20),
               label: Text(
-                _isLoading ? "Loading..." : "Play Audio",
+                _isLoading ? "Loading..." : "Listen",
                 style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold),
               ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF1E5B30),
                 foregroundColor: Colors.white,
-                padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 8.h),
+                padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 12.h),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.r)),
-                elevation: 2,
+                elevation: 0,
               ),
             ),
           ],
@@ -145,121 +148,93 @@ class AyahAnalysisDialog extends StatefulWidget {
 class _AyahAnalysisDialogState extends State<AyahAnalysisDialog> {
   String _selectedOption = "Translation";
   final List<String> _options = ["Tafseer", "Translation"];
-  String? _translation;
-  bool _isLoadingTranslation = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadTranslation();
-  }
-
-  Future<void> _loadTranslation() async {
-    setState(() {
-      _isLoadingTranslation = true;
-    });
-    final translation = await QuranApiService.getUrduTranslation(
-        widget.surahNumber, widget.verseNumber);
-    if (mounted) {
-      setState(() {
-        _translation = translation;
-        _isLoadingTranslation = false;
-      });
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.r)),
-      backgroundColor: const Color(0xFFFBF1E6),
-      child: Padding(
-        padding: EdgeInsets.all(20.w),
+      backgroundColor: Colors.transparent,
+      insetPadding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 40.h),
+      child: Container(
+        decoration: BoxDecoration(
+          color: const Color(0xFFF8F4ED),
+          borderRadius: BorderRadius.circular(28.r),
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Top Dropdown
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 12.w),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.5),
-                borderRadius: BorderRadius.circular(10.r),
-                border: Border.all(color: const Color(0xFF1E5B30).withOpacity(0.3)),
-              ),
-              child: DropdownButtonHideUnderline(
-                child: DropdownButton<String>(
-                  value: _selectedOption,
-                  isExpanded: true,
-                  icon: const Icon(Icons.keyboard_arrow_down, color: Color(0xFF1E5B30)),
-                  items: _options.map((String option) {
-                    return DropdownMenuItem<String>(
-                      value: option,
-                      child: Text(
-                        option,
-                        style: TextStyle(fontSize: 14.sp, color: const Color(0xFF1E5B30)),
-                      ),
-                    );
-                  }).toList(),
-                  onChanged: (String? newValue) {
-                    if (newValue != null) {
-                      setState(() => _selectedOption = newValue);
-                      debugPrint("Option selected: $newValue");
-                    }
-                  },
+            Padding(
+              padding: EdgeInsets.fromLTRB(20.w, 20.h, 20.w, 0),
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 12.w),
+                decoration: BoxDecoration(
+                  color: Colors.black.withValues(alpha: 0.03),
+                  borderRadius: BorderRadius.circular(12.r),
+                  border: Border.all(color: const Color(0xFF1E5B30).withValues(alpha: 0.1)),
+                ),
+                child: DropdownButtonHideUnderline(
+                  child: DropdownButton<String>(
+                    value: _selectedOption,
+                    isExpanded: true,
+                    icon: const Icon(Icons.keyboard_arrow_down, color: Color(0xFF1E5B30)),
+                    items: _options.map((String option) {
+                      return DropdownMenuItem<String>(
+                        value: option,
+                        child: Text(
+                          option,
+                          style: TextStyle(fontSize: 14.sp, color: const Color(0xFF1E5B30)),
+                        ),
+                      );
+                    }).toList(),
+                    onChanged: (String? newValue) {
+                      if (newValue != null) {
+                        setState(() => _selectedOption = newValue);
+                      }
+                    },
+                  ),
                 ),
               ),
             ),
-            SizedBox(height: 20.h),
-            // Translation Area
-            Container(
-              constraints: BoxConstraints(maxHeight: 200.h),
-              width: double.infinity,
-              padding: EdgeInsets.all(10.w),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.3),
-                borderRadius: BorderRadius.circular(10.r),
-              ),
-              child: SingleChildScrollView(
-                child: _isLoadingTranslation
-                    ? const Center(child: CircularProgressIndicator())
-                    : Text(
-                        _translation ?? "Translation not found.",
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 16.sp,
-                          color: Colors.black87,
-                        ),
+            Flexible(
+              child: ListView(
+                shrinkWrap: true,
+                padding: EdgeInsets.fromLTRB(20.w, 24.h, 20.w, 20.h),
+                children: [
+                  TranslationView(
+                    surahNumber: widget.surahNumber,
+                    verseNumber: widget.verseNumber,
+                  ),
+                  SizedBox(height: 32.h),
+                  Text(
+                    "Surah ${widget.surahNumber}, Ayah ${widget.verseNumber}",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      color: const Color(0xFF1E5B30).withValues(alpha: 0.6),
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  SizedBox(height: 20.h),
+                  Center(
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        AudioService.instance.playAyah(widget.surahNumber, widget.verseNumber);
+                        Navigator.pop(context);
+                      },
+                      icon: const Icon(Icons.play_arrow, color: Colors.white, size: 24),
+                      label: Text(
+                        "Play Ayah",
+                        style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold),
                       ),
-              ),
-            ),
-            SizedBox(height: 20.h),
-            // Center Info (Surah:Ayah)
-            Text(
-              "Surah ${widget.surahNumber}, Ayah ${widget.verseNumber}",
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 18.sp,
-                fontWeight: FontWeight.bold,
-                color: const Color(0xFF1E5B30),
-              ),
-            ),
-            // Bottom Play Button
-            ElevatedButton.icon(
-              onPressed: () {
-                AudioService.instance.playAyah(widget.surahNumber, widget.verseNumber);
-                Navigator.pop(context);
-              },
-              icon: const Icon(Icons.play_arrow, color: Colors.white),
-              label: Text(
-                "Play Ayah",
-                style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold),
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF1E5B30),
-                foregroundColor: Colors.white,
-                padding: EdgeInsets.symmetric(horizontal: 40.w, vertical: 8.h),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.r)),
-                elevation: 2,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF1E5B30),
+                        foregroundColor: Colors.white,
+                        padding: EdgeInsets.symmetric(horizontal: 48.w, vertical: 14.h),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.r)),
+                        elevation: 0,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ],

@@ -5,8 +5,9 @@ import 'interactive_qcf_page.dart';
 class InteractivePageviewQuran extends StatefulWidget {
   final int initialPageNumber;
   final PageController? controller;
-  final double sp;
-  final double h;
+  final double fontScale;
+  final double heightScale;
+  final (int, int)? highlightedAyah;
   final ValueChanged<int>? onPageChanged;
   final double? fontSize;
   final QcfThemeData? theme;
@@ -24,8 +25,9 @@ class InteractivePageviewQuran extends StatefulWidget {
     this.controller,
     this.onPageChanged,
     this.fontSize,
-    this.sp = 0.9,
-    this.h = 1.05,
+    this.fontScale = 0.9,
+    this.heightScale = 1.05,
+    this.highlightedAyah,
     this.theme,
     this.textColor = const Color(0xFF000000),
     this.pageBackgroundColor = const Color(0xFFFFFFFF),
@@ -83,8 +85,9 @@ class _InteractivePageviewQuranState extends State<InteractivePageviewQuran> {
                 fontSize: widget.fontSize,
                 onWordTap: widget.onWordTap,
                 onAyahTap: widget.onAyahTap,
-                sp: widget.sp,
-                h: widget.h,
+                fontScale: widget.fontScale,
+                heightScale: widget.heightScale,
+                highlightedAyah: widget.highlightedAyah,
                 theme: effectiveTheme,
               );
             },

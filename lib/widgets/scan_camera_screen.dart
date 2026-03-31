@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image/image.dart' as img;
 import 'package:my_perfect_quran/services/ai_service.dart';
-import 'package:my_perfect_quran/core/navigation.dart';
+
 import 'package:my_perfect_quran/helpers/quran_navigation_helper.dart';
 import 'package:my_perfect_quran/core/services/quran_api_service.dart';
 
@@ -48,7 +48,7 @@ class _ScanCameraScreenState extends State<ScanCameraScreen> {
         if (mounted) setState(() {});
       }
     } catch (e) {
-      debugPrint("Camera Init Error: $e");
+      // ignore empty catch
     }
   }
 
@@ -68,7 +68,7 @@ class _ScanCameraScreenState extends State<ScanCameraScreen> {
         _capturedImage = image;
       });
     } catch (e) {
-      debugPrint("Capture Error: $e");
+      // ignore empty catch
     }
   }
 
@@ -101,7 +101,7 @@ class _ScanCameraScreenState extends State<ScanCameraScreen> {
       final int ayah = result['ayah']!;
       final String surahName = QuranApiService.getSurahName(surah);
       
-      debugPrint("DEBUG: Detected Surah $surah ($surahName), Ayah $ayah.");
+
       
       if (mounted) {
         // Show success message first
@@ -124,7 +124,7 @@ class _ScanCameraScreenState extends State<ScanCameraScreen> {
         jumpToAyah(surah, ayah);
       }
     } catch (e) {
-      debugPrint("Processing Error: $e");
+
       if (mounted) {
         String errorMessage = e.toString().contains('Exception:') 
             ? e.toString().split('Exception: ')[1] 
@@ -321,7 +321,7 @@ class _ScanCameraScreenState extends State<ScanCameraScreen> {
           width: 30,
           height: 30,
           decoration: BoxDecoration(
-            color: Colors.greenAccent.withOpacity(0.5),
+            color: Colors.greenAccent.withValues(alpha: 0.5),
             shape: BoxShape.circle,
             border: Border.all(color: Colors.white, width: 2),
           ),
