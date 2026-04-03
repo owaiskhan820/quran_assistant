@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_perfect_quran/widgets/mushaf_view.dart';
 import 'package:my_perfect_quran/widgets/mushaf_header.dart';
-import 'package:my_perfect_quran/widgets/ayah_media_player.dart';
 import 'package:qcf_quran/qcf_quran.dart';
 import 'package:my_perfect_quran/core/navigation/nav_controller.dart';
 
@@ -165,11 +164,7 @@ class QuranPageState extends State<QuranPage> {
     );
 
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: SafeArea(
-        bottom: false,
-        child: AyahMediaPlayer(body: mainContent),
-      ),
-    );
+  body: mainContent, // JUST USE THE CONTENT DIRECTLY
+);
   }
 }

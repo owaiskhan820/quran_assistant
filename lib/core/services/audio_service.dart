@@ -8,22 +8,58 @@ class AudioService {
   static AudioService get instance => _instance;
 
   final AudioPlayer _player = AudioPlayer();
+  final ConcatenatingAudioSource _playlist = ConcatenatingAudioSource(children: []);
 
   // State for the current playing ayah to update UI listeners
   final ValueNotifier<int?> currentSurah = ValueNotifier(null);
   final ValueNotifier<int?> currentAyah = ValueNotifier(null);
   final ValueNotifier<bool> isPlaying = ValueNotifier(false);
   final ValueNotifier<bool> isBuffering = ValueNotifier(false);
+  final ValueNotifier<ProcessingState> processingState = ValueNotifier(ProcessingState.idle);
 
   AudioService._internal() {
+    _player.setAudioSource(_playlist);
+
     _player.playerStateStream.listen((state) {
       isPlaying.value = state.playing;
       isBuffering.value = state.processingState == ProcessingState.buffering || 
                           state.processingState == ProcessingState.loading;
+      processingState.value = state.processingState;
       
       if (state.processingState == ProcessingState.completed) {
-        _playNext();
+        isPlaying.value = false;
       }
+    });
+
+    _player.currentIndexStream.listen((index) async {
+       if (index != null && index > 0) {
+           if (currentSurah.value == null || currentAyah.value == null) return;
+           int s = currentSurah.value!;
+           int a = currentAyah.value! + 1;
+           if (a > getVerseCount(s)) { 
+             s++; 
+             a = 1; 
+           }
+           
+           if (s <= 114) {
+             currentSurah.value = s;
+             currentAyah.value = a;
+             
+             int nextS = s;
+             int nextA = a + 1;
+             if (nextA > getVerseCount(nextS)) { 
+               nextS++; 
+               nextA = 1; 
+             }
+             if (nextS <= 114) {
+               final url = await QuranApiService.getAyahAudioUrl(nextS, nextA);
+               if (url != null) {
+                 final fullUrl = url.startsWith('http') ? url : "https://mirrors.quranicaudio.com/everyayah/$url";
+                 await _playlist.add(AudioSource.uri(Uri.parse(fullUrl)));
+               }
+             }
+           }
+       }
     });
 
     _player.playbackEventStream.listen((event) {}, onError: (Object e, StackTrace st) {
@@ -53,26 +89,23 @@ class AudioService {
 
   /// Plays audio for a full ayah.
   Future<void> playAyah(int surah, int ayah) async {
-  try {
-    currentSurah.value = surah;
-    currentAyah.value = ayah;
+    try {
+      await _playlist.clear();
+      currentSurah.value = surah;
+      currentAyah.value = ayah;
 
-    final url = await QuranApiService.getAyahAudioUrl(surah, ayah);
-    if (url != null) {
-      // Use a full URL check
-      final fullUrl = url.startsWith('http') ? url : "https://mirrors.quranicaudio.com/everyayah/$url";
-      
-
-      
-      // Don't call await _player.stop() here; it's redundant and slow.
-      // just_audio handles the transition better if you just call setUrl.
-      await _player.setUrl(fullUrl);
-      _player.play(); // No 'await' here to keep the UI snappy
+      final url = await QuranApiService.getAyahAudioUrl(surah, ayah);
+      if (url != null) {
+        final fullUrl = url.startsWith('http') ? url : "https://mirrors.quranicaudio.com/everyayah/$url";
+        await _playlist.add(AudioSource.uri(Uri.parse(fullUrl)));
+        
+        await _player.seek(Duration.zero, index: 0);
+        _player.play();
+      }
+    } catch (e) {
+      // ignore
     }
-  } catch (e) {
-    // ignore empty catch
   }
-}
   
 
   /// RESTORED: Plays audio for a specific word in an ayah.
@@ -88,7 +121,7 @@ class AudioService {
         if (wordIndex < 1 || wordIndex > 4) w = "001";
       }
 
-      final url = "https://audio.qurancdn.com/wbw/${s}_${a}_${w}.mp3";
+      final url = "https://audio.qurancdn.com/wbw/${s}_${a}_$w.mp3";
 
       
       await _player.stop();
@@ -116,7 +149,13 @@ class AudioService {
     isPlaying.value = false;
   }
 
-  Future<void> playNext() async => _playNext();
+  Future<void> playNext() async {
+    if (_player.hasNext) {
+      await _player.seekToNext();
+    } else {
+      await _playNext();
+    }
+  }
 
   Future<void> playPrevious() async {
     if (currentSurah.value != null && currentAyah.value != null) {
