@@ -9,6 +9,7 @@ import 'package:my_perfect_quran/core/navigation/nav_controller.dart';
 import 'package:my_perfect_quran/screens/quran_page.dart';
 import 'package:my_perfect_quran/screens/index_page.dart';
 import 'package:my_perfect_quran/widgets/custom_bottom_nav_bar.dart';
+import 'package:my_perfect_quran/services/translation_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,6 +22,8 @@ void main() async {
 
   // Initialize AIService
   AIService().init();
+  
+  await TranslationService.instance.loadLocalTranslations();
 
   runApp(const MyQuranApp());
 }

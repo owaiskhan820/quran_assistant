@@ -1,72 +1,8 @@
-import 'dart:convert';
-import 'package:http/http.dart' as http;
-
 class QuranApiService {
   static const String baseUrl = "https://api.quran.com/api/v4";
-  
-  // 1. Persistent client to avoid SSL handshake overhead on every tap
-  static final http.Client _client = http.Client();
-
-  // 2. Simple In-Memory Cache for translations
-  static final Map<String, String> _translationCache = {};
 
   /// Fetches Urdu translation for a specific ayah.
-  /// Using ID 158 (Fateh Muhammad Jalandhari)
-  static Future<String?> getUrduTranslation(int surah, int ayah) async {
-    final verseKey = "$surah:$ayah";
-    final cacheKey = "ur:$verseKey";
-    
-    if (_translationCache.containsKey(cacheKey)) {
-      return _translationCache[cacheKey];
-    }
 
-    try {
-      final url = Uri.parse("$baseUrl/quran/translations/158?verse_key=$verseKey");
-      final response = await _client.get(url);
-      
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        final translations = data['translations'] as List;
-        if (translations.isNotEmpty) {
-          final text = translations[0]['text'];
-          _translationCache[cacheKey] = text;
-          return text;
-        }
-      }
-    } catch (e) {
-      // ignore
-    }
-    return null;
-  }
-
-  /// Fetches English translation for a specific ayah.
-  /// Using ID 131 (Dr. Mustafa Khattab, The Clear Quran)
-  static Future<String?> getEnglishTranslation(int surah, int ayah) async {
-    final verseKey = "$surah:$ayah";
-    final cacheKey = "en:$verseKey";
-    
-    if (_translationCache.containsKey(cacheKey)) {
-      return _translationCache[cacheKey];
-    }
-
-    try {
-      final url = Uri.parse("$baseUrl/quran/translations/131?verse_key=$verseKey");
-      final response = await _client.get(url);
-      
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        final translations = data['translations'] as List;
-        if (translations.isNotEmpty) {
-          final text = translations[0]['text'];
-          _translationCache[cacheKey] = text;
-          return text;
-        }
-      }
-    } catch (e) {
-      // ignore
-    }
-    return null;
-  }
 
   static String getSurahName(int surahNumber) {
     const names = {
@@ -115,8 +51,5 @@ class QuranApiService {
   return null;
 }
 
-  /// Close the client when the app is disposed (optional, but good practice)
-  static void dispose() {
-    _client.close();
-  }
+
 }

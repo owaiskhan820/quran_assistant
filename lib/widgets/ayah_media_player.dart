@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_perfect_quran/core/services/audio_service.dart';
-import 'package:my_perfect_quran/core/services/quran_api_service.dart';
+import 'package:my_perfect_quran/services/translation_service.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 
 class AyahMediaPlayer extends StatefulWidget {
@@ -36,11 +36,11 @@ class _AyahMediaPlayerState extends State<AyahMediaPlayer> {
     super.dispose();
   }
 
-  void _updateTranslation() async {
+  void _updateTranslation() {
     final s = AudioService.instance.currentSurah.value;
     final a = AudioService.instance.currentAyah.value;
     if (s != null && a != null) {
-      final translation = await QuranApiService.getUrduTranslation(s, a);
+      final translation = TranslationService.instance.getUrduTranslation(s, a);
       if (mounted) {
         setState(() {
           _translationText = translation;
