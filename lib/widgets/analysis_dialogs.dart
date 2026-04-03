@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_perfect_quran/core/services/audio_service.dart';
+import 'package:my_perfect_quran/core/services/settings_service.dart';
 import 'package:my_perfect_quran/widgets/translation_view.dart';
 import 'package:qcf_quran/qcf_quran.dart';
 import 'package:my_perfect_quran/helpers/quran_navigation_helper.dart' as helper;
@@ -153,6 +154,7 @@ class _AyahAnalysisDialogState extends State<AyahAnalysisDialog> {
   
   late int _currentSurah;
   late int _currentVerse;
+  int _currentRecitationId = 7;
   final ValueNotifier<bool> isAutoPlayEnabled = ValueNotifier(false);
 
   void _handleProcessingState() {
@@ -162,7 +164,7 @@ class _AyahAnalysisDialogState extends State<AyahAnalysisDialog> {
     }
   }
 
-  void _goToNextAyah() {
+  Future<void> _goToNextAyah() async {
     int s = _currentSurah;
     int a = _currentVerse + 1;
     if (a > getVerseCount(s)) {
@@ -177,10 +179,20 @@ class _AyahAnalysisDialogState extends State<AyahAnalysisDialog> {
       _currentSurah = s;
       _currentVerse = a;
     });
-    AudioService.instance.playAyah(s, a);
+    final messenger = ScaffoldMessenger.of(context);
+    final success = await AudioService.instance.playAyah(s, a, recitationId: _currentRecitationId);
+    if (!success) {
+      messenger.showSnackBar(
+        const SnackBar(
+          content: Text('Audio not available for this Reciter. Please try another.'),
+          backgroundColor: Colors.redAccent,
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
   }
 
-  void _goToPreviousAyah() {
+  Future<void> _goToPreviousAyah() async {
     int s = _currentSurah;
     int a = _currentVerse - 1;
     if (a < 1) {
@@ -195,7 +207,17 @@ class _AyahAnalysisDialogState extends State<AyahAnalysisDialog> {
       _currentSurah = s;
       _currentVerse = a;
     });
-    AudioService.instance.playAyah(s, a);
+    final messenger = ScaffoldMessenger.of(context);
+    final success = await AudioService.instance.playAyah(s, a, recitationId: _currentRecitationId);
+    if (!success) {
+      messenger.showSnackBar(
+        const SnackBar(
+          content: Text('Audio not available for this Reciter. Please try another.'),
+          backgroundColor: Colors.redAccent,
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
   }
 
   @override
@@ -203,6 +225,8 @@ class _AyahAnalysisDialogState extends State<AyahAnalysisDialog> {
     super.initState();
     _currentSurah = widget.surahNumber;
     _currentVerse = widget.verseNumber;
+    _currentRecitationId = SettingsService.instance.qariId;
+    _selectedLanguage.value = SettingsService.instance.translationLang;
     AudioService.instance.currentAyah.addListener(_onAyahChanged);
     AudioService.instance.processingState.addListener(_handleProcessingState);
   }
@@ -244,20 +268,10 @@ class _AyahAnalysisDialogState extends State<AyahAnalysisDialog> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Padding(
-              padding: EdgeInsets.fromLTRB(20.w, 20.h, 20.w, 0),
+              padding: EdgeInsets.fromLTRB(20.w, 16.h, 20.w, 0),
               child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  Expanded(
-                    child: Text(
-                      "Translation & Tafseer",
-                      style: TextStyle(
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.bold,
-                        color: const Color(0xFF1E5B30),
-                      ),
-                    ),
-                  ),
-                  SizedBox(width: 12.w),
                   ValueListenableBuilder<String>(
                     valueListenable: _selectedLanguage,
                     builder: (context, lang, child) {
@@ -285,19 +299,24 @@ class _AyahAnalysisDialogState extends State<AyahAnalysisDialog> {
             ),
             Flexible(
               child: ListView(
+                physics: const ClampingScrollPhysics(),
                 shrinkWrap: true,
                 padding: EdgeInsets.fromLTRB(20.w, 24.h, 20.w, 20.h),
                 children: [
-                  Text(
-                    getVerseQCF(_currentSurah, _currentVerse, verseEndSymbol: true),
-                    textAlign: TextAlign.center,
-                    textDirection: TextDirection.rtl,
-                    style: TextStyle(
-                      fontFamily: "QCF_P${helper.getPageNumber(_currentSurah, _currentVerse).toString().padLeft(3, '0')}",
-                      package: 'qcf_quran',
-                      fontSize: 26.0,
-                      color: Colors.black,
-                      height: 1.5,
+                  SizedBox(
+                    width: double.infinity,
+                    child: Text(
+                      getVerseQCF(_currentSurah, _currentVerse, verseEndSymbol: true),
+                      textAlign: TextAlign.right,
+                      textDirection: TextDirection.rtl,
+                      softWrap: true,
+                      style: TextStyle(
+                        fontFamily: "QCF_P${helper.getPageNumber(_currentSurah, _currentVerse).toString().padLeft(3, '0')}",
+                        package: 'qcf_quran',
+                        fontSize: 26.0,
+                        color: Colors.black,
+                        height: 1.5,
+                      ),
                     ),
                   ),
                   Padding(
@@ -323,6 +342,64 @@ class _AyahAnalysisDialogState extends State<AyahAnalysisDialog> {
                     ),
                   ),
                   SizedBox(height: 20.h),
+                    Container(
+                      width: 220.w,
+                      margin: EdgeInsets.symmetric(horizontal: 4.w),
+                      padding: EdgeInsets.symmetric(horizontal: 12.w),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withValues(alpha: 0.02),
+                        borderRadius: BorderRadius.circular(12.r),
+                        border: Border.all(color: const Color(0xFF1E5B30).withValues(alpha: 0.08)),
+                      ),
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton<int>(
+                        value: _currentRecitationId,
+                        isExpanded: true,
+                        icon: Icon(Icons.arrow_forward_ios, size: 12.sp, color: const Color(0xFF1E5B30).withAlpha(128)),
+                        style: TextStyle(
+                          fontSize: 13.sp,
+                          color: const Color(0xFF1E5B30),
+                          fontWeight: FontWeight.w500,
+                        ),
+                        onChanged: (val) async {
+                          if (val != null) {
+                            setState(() => _currentRecitationId = val);
+                            final messenger = ScaffoldMessenger.of(context);
+                            final success = await AudioService.instance.playAyah(_currentSurah, _currentVerse, recitationId: val);
+                            if (!success) {
+                              messenger.showSnackBar(
+                                const SnackBar(
+                                  content: Text('Audio not available for this Reciter. Please try another.'),
+                                  backgroundColor: Colors.redAccent,
+                                  duration: Duration(seconds: 2),
+                                ),
+                              );
+                            }
+                          }
+                        },
+                        items: AudioService.instance.qariMap.entries.map((entry) {
+                          return DropdownMenuItem<int>(
+                            value: entry.value,
+                            child: Row(
+                              children: [
+                                Icon(Icons.person_pin, size: 20.sp, color: const Color(0xFF1E5B30)),
+                                SizedBox(width: 8.w),
+                                 Expanded(
+                                  child: Text(
+                                    entry.key,
+                                    overflow: TextOverflow.ellipsis,
+                                    maxLines: 1,
+                                    style: TextStyle(fontSize: 13.sp),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 20.h),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
@@ -333,22 +410,40 @@ class _AyahAnalysisDialogState extends State<AyahAnalysisDialog> {
                       ValueListenableBuilder<bool>(
                         valueListenable: AudioService.instance.isPlaying,
                         builder: (context, isPlaying, _) {
-                          return IconButton(
-                            icon: Icon(
-                              isPlaying ? Icons.pause_circle_filled : Icons.play_circle_filled,
-                              color: const Color(0xFF1E5B30),
-                              size: 45.sp,
-                            ),
-                            onPressed: () {
-                              final currentS = AudioService.instance.currentSurah.value;
-                              final currentA = AudioService.instance.currentAyah.value;
-                              final isSameAyah = currentS == _currentSurah && currentA == _currentVerse;
-                              
-                              if (isSameAyah) {
-                                AudioService.instance.togglePlayPause();
-                              } else {
-                                AudioService.instance.playAyah(_currentSurah, _currentVerse);
+                          return ValueListenableBuilder<bool>(
+                            valueListenable: AudioService.instance.isBuffering,
+                            builder: (context, isBuffering, _) {
+                              if (isBuffering) {
+                                return Padding(
+                                  padding: EdgeInsets.all(8.sp),
+                                  child: SizedBox(
+                                    width: 32.sp,
+                                    height: 32.sp,
+                                    child: CircularProgressIndicator(
+                                      color: const Color(0xFF1E5B30),
+                                      strokeWidth: 3.sp,
+                                    ),
+                                  ),
+                                );
                               }
+                              return IconButton(
+                                icon: Icon(
+                                  isPlaying ? Icons.pause_circle_filled : Icons.play_circle_filled,
+                                  color: const Color(0xFF1E5B30),
+                                  size: 45.sp,
+                                ),
+                                onPressed: () {
+                                  final currentS = AudioService.instance.currentSurah.value;
+                                  final currentA = AudioService.instance.currentAyah.value;
+                                  final isSameAyah = currentS == _currentSurah && currentA == _currentVerse;
+                                  
+                                  if (isSameAyah) {
+                                    AudioService.instance.togglePlayPause();
+                                  } else {
+                                    AudioService.instance.playAyah(_currentSurah, _currentVerse, recitationId: _currentRecitationId);
+                                  }
+                                },
+                              );
                             },
                           );
                         },

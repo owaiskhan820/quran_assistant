@@ -8,11 +8,16 @@ import 'package:my_perfect_quran/core/navigation.dart';
 import 'package:my_perfect_quran/core/navigation/nav_controller.dart';
 import 'package:my_perfect_quran/screens/quran_page.dart';
 import 'package:my_perfect_quran/screens/index_page.dart';
+import 'package:my_perfect_quran/screens/more_page.dart';
 import 'package:my_perfect_quran/widgets/custom_bottom_nav_bar.dart';
 import 'package:my_perfect_quran/services/translation_service.dart';
+import 'package:my_perfect_quran/core/services/settings_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Initialize Preferences
+  await SettingsService.instance.init();
   
   // Initialize desktop settings (ignored on mobile)
   await DesktopHelper.init();
@@ -70,7 +75,7 @@ class MainNavigationShell extends StatelessWidget {
             children: [
               QuranPage(key: quranPageKey),
               const IndexPage(),
-              const Center(child: Text('More')),
+              const MorePage(),
             ],
           );
         },
@@ -87,9 +92,9 @@ class MainNavigationShell extends StatelessWidget {
               duration: const Duration(milliseconds: 300),
               height: showNav ? (65.h + 24.h) : 0, // Increased slightly for SafeArea
               curve: Curves.easeInOut,
-              child: SafeArea(
+              child: const SafeArea(
                 top: false,
-                child: const Wrap(
+                child: Wrap(
                   children: [
                     CustomBottomNavBar(),
                   ],

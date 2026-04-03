@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+
 class QuranApiService {
   static const String baseUrl = "https://api.quran.com/api/v4";
 
@@ -34,22 +37,23 @@ class QuranApiService {
   }
 
   static Future<String?> getAyahAudioUrl(int surah, int ayah, {int recitationId = 7}) async {
-  try {
-    // Pad IDs to 3 digits (e.g., Surah 1 -> 001, Ayah 7 -> 007)
-    String s = surah.toString().padLeft(3, '0');
-    String a = ayah.toString().padLeft(3, '0');
-
-    // This is the NEW ultra-reliable CDN link
-    // Pattern: https://audio.qurancdn.com/reciter/[ID]/mp3/[SSS AAA].mp3
-    final directUrl = "https://audio.qurancdn.com/Alafasy/mp3/$s$a.mp3";
-    
-
-    return directUrl;
-  } catch (e) {
-    // ignore empty catch
+    try {
+      final String ayahKey = "$surah:$ayah";
+      final response = await http.get(Uri.parse(
+          '$baseUrl/recitations/$recitationId/by_ayah/$ayahKey'));
+      
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        final urlPath = data['audio_files']?[0]['url'];
+        if (urlPath != null) {
+          return 'https://audio.qurancdn.com/$urlPath';
+        }
+      }
+    } catch (e) {
+      // ignore
+    }
+    return null;
   }
-  return null;
-}
 
 
 }

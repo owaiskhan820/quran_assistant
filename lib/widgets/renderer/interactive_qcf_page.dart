@@ -1,5 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:qcf_quran/qcf_quran.dart';
 
 class InteractiveQcfPage extends StatefulWidget {
@@ -57,9 +58,7 @@ class _InteractiveQcfPageState extends State<InteractiveQcfPage> {
   void _initData() {
     _pageFont = "QCF_P${widget.pageNumber.toString().padLeft(3, '0')}";
     _baseFontSize = getFontSize(widget.pageNumber, context) * widget.fontScale;
-    if (_cachedSpans == null) {
-      _cachedSpans = _buildSpans();
-    }
+    _cachedSpans ??= _buildSpans();
   }
 
   List<InlineSpan> _buildSpans() {
@@ -89,7 +88,7 @@ class _InteractiveQcfPageState extends State<InteractiveQcfPage> {
               );
               verseSpans.add(const TextSpan(text: "\n"));
             } else {
-              final basmalaText = " ﱁ  ﱂﱃﱄ";
+              const basmalaText = " ﱁ  ﱂﱃﱄ";
               final basmalaWords = basmalaText.trim().split(RegExp(r'\s+'));
               final List<InlineSpan> basmalaSpans = [];
               for (int i = 0; i < basmalaWords.length; i++) {
@@ -217,22 +216,48 @@ class _InteractiveQcfPageState extends State<InteractiveQcfPage> {
       return Center(child: Text('Invalid page number: ${widget.pageNumber}'));
     }
 
-    return Center(
-      child: Text.rich(
-        TextSpan(children: _cachedSpans ?? []),
-        locale: const Locale("ar"),
-        textAlign: TextAlign.center,
-        textDirection: TextDirection.rtl,
-        style: TextStyle(
-          fontFamily: _pageFont,
-          package: 'qcf_quran',
-          fontSize: _baseFontSize,
-          color: widget.theme.verseTextColor,
-          height: widget.theme.verseHeight * widget.heightScale,
-          letterSpacing: widget.theme.letterSpacing,
-          wordSpacing: widget.theme.wordSpacing,
+    final bool isSpecialPage = widget.pageNumber == 1 || widget.pageNumber == 2;
+
+    return Column(
+      children: [
+        Expanded(
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return SingleChildScrollView(
+                padding: EdgeInsets.only(bottom: 120.h),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    minHeight: isSpecialPage ? constraints.maxHeight - 120.h : 0,
+                  ),
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: isSpecialPage ? MainAxisAlignment.center : MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Text.rich(
+                          TextSpan(children: _cachedSpans ?? []),
+                          locale: const Locale("ar"),
+                          textAlign: TextAlign.center,
+                          textDirection: TextDirection.rtl,
+                          style: TextStyle(
+                            fontFamily: _pageFont,
+                            package: 'qcf_quran',
+                            fontSize: _baseFontSize,
+                            color: widget.theme.verseTextColor,
+                            height: widget.theme.verseHeight * widget.heightScale,
+                            letterSpacing: widget.theme.letterSpacing,
+                            wordSpacing: widget.theme.wordSpacing,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
         ),
-      ),
+      ],
     );
   }
 }

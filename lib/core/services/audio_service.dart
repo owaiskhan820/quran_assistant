@@ -10,6 +10,23 @@ class AudioService {
   final AudioPlayer _player = AudioPlayer();
   final ConcatenatingAudioSource _playlist = ConcatenatingAudioSource(children: []);
 
+  final Map<String, int> qariMap = {
+  'AbdulBaset AbdulSamad (Mujawwad)': 1,
+  'AbdulBaset AbdulSamad (Murattal)': 2,
+  'Abdur-Rahman as-Sudais': 3,
+  'Abu Bakr al-Shatri': 4,
+  'Hani ar-Rifai': 5,
+  //'Mahmoud Khalil Al-Husary': 6,
+  'Mishari Rashid al-`Afasy': 7,
+  'Mohamed Siddiq al-Minshawi (Mujawwad)': 8,
+  'Mohamed Siddiq al-Minshawi (Murattal)': 9,
+  //'Sa`ud ash-Shuraym': 10,
+  'Mohamed al-Tablawi': 11,
+  'Mahmoud Khalil Al-Husary (Muallim)': 12,
+};
+
+  int _currentRecitationId = 7;
+
   // State for the current playing ayah to update UI listeners
   final ValueNotifier<int?> currentSurah = ValueNotifier(null);
   final ValueNotifier<int?> currentAyah = ValueNotifier(null);
@@ -52,10 +69,9 @@ class AudioService {
                nextA = 1; 
              }
              if (nextS <= 114) {
-               final url = await QuranApiService.getAyahAudioUrl(nextS, nextA);
+               final url = await QuranApiService.getAyahAudioUrl(nextS, nextA, recitationId: _currentRecitationId);
                if (url != null) {
-                 final fullUrl = url.startsWith('http') ? url : "https://mirrors.quranicaudio.com/everyayah/$url";
-                 await _playlist.add(AudioSource.uri(Uri.parse(fullUrl)));
+                 await _playlist.add(AudioSource.uri(Uri.parse(url)));
                }
              }
            }
@@ -88,22 +104,32 @@ class AudioService {
   }
 
   /// Plays audio for a full ayah.
-  Future<void> playAyah(int surah, int ayah) async {
+  Future<bool> playAyah(int surah, int ayah, {int? recitationId}) async {
     try {
+      if (recitationId != null) _currentRecitationId = recitationId;
+      
       await _playlist.clear();
       currentSurah.value = surah;
       currentAyah.value = ayah;
+      
+      isBuffering.value = true;
 
-      final url = await QuranApiService.getAyahAudioUrl(surah, ayah);
+      final url = await QuranApiService.getAyahAudioUrl(surah, ayah, recitationId: _currentRecitationId);
+      
       if (url != null) {
-        final fullUrl = url.startsWith('http') ? url : "https://mirrors.quranicaudio.com/everyayah/$url";
-        await _playlist.add(AudioSource.uri(Uri.parse(fullUrl)));
-        
+        await _playlist.add(AudioSource.uri(Uri.parse(url)));
         await _player.seek(Duration.zero, index: 0);
         _player.play();
+        return true;
+      } else {
+        isBuffering.value = false;
+        await stop();
+        return false;
       }
     } catch (e) {
-      // ignore
+      isBuffering.value = false;
+      await stop();
+      return false;
     }
   }
   

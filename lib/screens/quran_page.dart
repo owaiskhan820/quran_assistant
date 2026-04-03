@@ -164,7 +164,10 @@ class QuranPageState extends State<QuranPage> {
     );
 
     return Scaffold(
-  body: mainContent, // JUST USE THE CONTENT DIRECTLY
-);
+      body: SafeArea(
+        bottom: false,
+        child: mainContent,
+      ),
+    );
   }
 }

@@ -27,9 +27,9 @@ class TranslationView extends StatelessWidget {
             textAlign: TextAlign.right,
             style: TextStyle(
               fontSize: 17.sp,
-              height: 2.0,
+              height: 2.2,
               color: Colors.black87,
-              fontFamily: 'Noto Nastaliq Urdu',
+              fontFamily: 'Jameel Noori Kasheeda',
               fontWeight: FontWeight.w400,
             ),
           );
