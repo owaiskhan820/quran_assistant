@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_perfect_quran/core/navigation/nav_controller.dart';
+import 'package:my_perfect_quran/core/services/settings_service.dart';
+import 'package:my_perfect_quran/core/theme/typography.dart';
 
 class MushafHeader extends StatelessWidget {
   final String surahName;
@@ -53,6 +55,7 @@ class _HeaderButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isUrdu = SettingsService.instance.translationLang == 'ur';
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(4.r),
@@ -62,10 +65,12 @@ class _HeaderButton extends StatelessWidget {
           label,
           style: TextStyle(
             color: const Color(0xFF1E5B30),
-            fontSize: 14.sp,
+            fontSize: isUrdu ? 16.sp : 14.sp,
+            fontFamily: isUrdu ? AppTypography.urduFont : null,
             fontWeight: FontWeight.w500,
             decoration: TextDecoration.underline,
             decorationStyle: TextDecorationStyle.dashed,
+            height: isUrdu ? 1.0 : null,
           ),
         ),
       ),

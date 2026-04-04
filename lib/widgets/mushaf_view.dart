@@ -3,6 +3,7 @@ import 'package:qcf_quran/qcf_quran.dart';
 import 'package:my_perfect_quran/widgets/renderer/interactive_pageview_quran.dart';
 import 'package:my_perfect_quran/widgets/analysis_dialogs.dart';
 import 'package:my_perfect_quran/core/navigation/nav_controller.dart';
+import 'package:my_perfect_quran/core/services/audio_service.dart';
 
 class MushafView extends StatelessWidget {
   final int initialPage;
@@ -26,6 +27,7 @@ class MushafView extends StatelessWidget {
   });
 
   void _showWordDialog(BuildContext context, int surah, int verse, String word, String font, int wordIndex) {
+    AudioService.instance.stop();
     showBottomNavNotifier.value = true;
     showDialog(
       context: context,
@@ -40,6 +42,7 @@ class MushafView extends StatelessWidget {
   }
 
   void _showAyahDialog(BuildContext context, int surah, int verse) {
+    AudioService.instance.stop();
     showBottomNavNotifier.value = true;
     showDialog(
       context: context,

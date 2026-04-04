@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:my_perfect_quran/services/translation_service.dart';
+import 'package:my_perfect_quran/core/theme/typography.dart';
 
 class TranslationView extends StatelessWidget {
   final int surahNumber;
@@ -25,12 +26,9 @@ class TranslationView extends StatelessWidget {
           return Text(
             urduTranslation,
             textAlign: TextAlign.right,
-            style: TextStyle(
+            style: AppTypography.urduTranslation(
               fontSize: 17.sp,
-              height: 2.2,
               color: Colors.black87,
-              fontFamily: 'Jameel Noori Kasheeda',
-              fontWeight: FontWeight.w400,
             ),
           );
         } else {
@@ -38,12 +36,9 @@ class TranslationView extends StatelessWidget {
           return Text(
             englishTranslation,
             textAlign: TextAlign.left,
-            style: TextStyle(
+            style: AppTypography.englishTranslation(
               fontSize: 17.sp,
-              height: 1.5,
               color: Colors.black87,
-              fontFamily: 'Inter',
-              fontWeight: FontWeight.w400,
             ),
           );
         }

@@ -5,7 +5,9 @@ import 'package:my_perfect_quran/core/services/audio_service.dart';
 import 'package:my_perfect_quran/core/services/settings_service.dart';
 import 'package:my_perfect_quran/widgets/translation_view.dart';
 import 'package:qcf_quran/qcf_quran.dart';
+import 'package:my_perfect_quran/core/theme/typography.dart';
 import 'package:my_perfect_quran/helpers/quran_navigation_helper.dart' as helper;
+import 'package:my_perfect_quran/l10n/translation_constants.dart';
 
 class WordAnalysisDialog extends StatefulWidget {
   final String word;
@@ -65,7 +67,10 @@ class _WordAnalysisDialogState extends State<WordAnalysisDialog> {
                       value: option,
                       child: Text(
                         option,
-                        style: TextStyle(fontSize: 14.sp, color: const Color(0xFF1E5B30)),
+                        style: AppTypography.englishBase.copyWith(
+                          fontSize: 14.sp,
+                          color: const Color(0xFF1E5B30),
+                        ),
                       ),
                     );
                   }).toList(),
@@ -117,8 +122,14 @@ class _WordAnalysisDialogState extends State<WordAnalysisDialog> {
                     )
                   : const Icon(Icons.play_arrow, color: Colors.white, size: 20),
               label: Text(
-                _isLoading ? "Loading..." : "Listen",
-                style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold),
+                _isLoading 
+                  ? (SettingsService.instance.translationLang == 'ur' ? "لوڈ ہو رہا ہے..." : "Loading...")
+                  : (SettingsService.instance.translationLang == 'ur' ? "سنیں" : "Listen"),
+                style: TextStyle(
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: SettingsService.instance.translationLang == 'ur' ? AppTypography.urduFont : AppTypography.englishFont,
+                ),
               ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF1E5B30),
@@ -288,7 +299,10 @@ class _AyahAnalysisDialogState extends State<AyahAnalysisDialog> {
                           selectedBackgroundColor: const Color(0xFF1E5B30),
                           selectedForegroundColor: Colors.white,
                           visualDensity: VisualDensity.compact,
-                          textStyle: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.bold),
+                          textStyle: AppTypography.englishBase.copyWith(
+                            fontSize: 12.sp,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                         showSelectedIcon: false,
                       );
@@ -303,29 +317,6 @@ class _AyahAnalysisDialogState extends State<AyahAnalysisDialog> {
                 shrinkWrap: true,
                 padding: EdgeInsets.fromLTRB(20.w, 24.h, 20.w, 20.h),
                 children: [
-                  SizedBox(
-                    width: double.infinity,
-                    child: Text(
-                      getVerseQCF(_currentSurah, _currentVerse, verseEndSymbol: true),
-                      textAlign: TextAlign.right,
-                      textDirection: TextDirection.rtl,
-                      softWrap: true,
-                      style: TextStyle(
-                        fontFamily: "QCF_P${helper.getPageNumber(_currentSurah, _currentVerse).toString().padLeft(3, '0')}",
-                        package: 'qcf_quran',
-                        fontSize: 26.0,
-                        color: Colors.black,
-                        height: 1.5,
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.symmetric(vertical: 16.h),
-                    child: Divider(
-                      color: const Color(0xFF1E5B30).withValues(alpha: 0.1),
-                      thickness: 1,
-                    ),
-                  ),
                   TranslationView(
                     surahNumber: _currentSurah,
                     verseNumber: _currentVerse,
@@ -333,12 +324,15 @@ class _AyahAnalysisDialogState extends State<AyahAnalysisDialog> {
                   ),
                   SizedBox(height: 32.h),
                   Text(
-                    "Surah $_currentSurah, Ayah $_currentVerse",
+                    SettingsService.instance.translationLang == 'ur'
+                        ? "${TranslationConstants.getString('ur', 'surah')} ${TranslationConstants.toUrduDigits(_currentSurah)}، ${TranslationConstants.getString('ur', 'ayah')} ${TranslationConstants.toUrduDigits(_currentVerse)}"
+                        : "Surah $_currentSurah, Ayah $_currentVerse",
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 14.sp,
                       color: const Color(0xFF1E5B30).withValues(alpha: 0.6),
                       fontWeight: FontWeight.w600,
+                      fontFamily: SettingsService.instance.translationLang == 'ur' ? AppTypography.urduFont : AppTypography.englishFont,
                     ),
                   ),
                   SizedBox(height: 20.h),
@@ -356,7 +350,7 @@ class _AyahAnalysisDialogState extends State<AyahAnalysisDialog> {
                         value: _currentRecitationId,
                         isExpanded: true,
                         icon: Icon(Icons.arrow_forward_ios, size: 12.sp, color: const Color(0xFF1E5B30).withAlpha(128)),
-                        style: TextStyle(
+                        style: AppTypography.englishBase.copyWith(
                           fontSize: 13.sp,
                           color: const Color(0xFF1E5B30),
                           fontWeight: FontWeight.w500,
@@ -389,7 +383,7 @@ class _AyahAnalysisDialogState extends State<AyahAnalysisDialog> {
                                     entry.key,
                                     overflow: TextOverflow.ellipsis,
                                     maxLines: 1,
-                                    style: TextStyle(fontSize: 13.sp),
+                                    style: AppTypography.englishBase.copyWith(fontSize: 13.sp),
                                   ),
                                 ),
                               ],
@@ -459,11 +453,13 @@ class _AyahAnalysisDialogState extends State<AyahAnalysisDialog> {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Text(
-                                'Auto-Play',
+                                SettingsService.instance.translationLang == 'ur' ? 'آٹو پلے' : 'Auto-Play',
                                 style: TextStyle(
                                   fontSize: 12.sp,
                                   color: const Color(0xFF1E5B30).withValues(alpha: 0.8),
                                   fontWeight: FontWeight.w500,
+                                  fontFamily: SettingsService.instance.translationLang == 'ur' ? AppTypography.urduFont : AppTypography.englishFont,
+                                  height: SettingsService.instance.translationLang == 'ur' ? 1.0 : null,
                                 ),
                               ),
                               SizedBox(width: 4.w),

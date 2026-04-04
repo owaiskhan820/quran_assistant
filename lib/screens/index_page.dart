@@ -4,6 +4,7 @@ import 'package:qcf_quran/qcf_quran.dart';
 import 'package:my_perfect_quran/core/navigation.dart';
 import 'package:my_perfect_quran/core/navigation/nav_controller.dart';
 import 'package:my_perfect_quran/screens/quran_page.dart';
+import 'package:my_perfect_quran/core/theme/typography.dart';
 
 class IndexPage extends StatefulWidget {
   const IndexPage({super.key});
@@ -44,7 +45,7 @@ class _IndexPageState extends State<IndexPage> {
           centerTitle: true,
           title: Text(
             'Index',
-            style: TextStyle(
+            style: AppTypography.englishBase.copyWith(
               color: const Color(0xFF1E5B30),
               fontSize: 22.sp,
               fontWeight: FontWeight.bold,

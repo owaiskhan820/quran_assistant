@@ -12,6 +12,7 @@ import 'package:my_perfect_quran/screens/more_page.dart';
 import 'package:my_perfect_quran/widgets/custom_bottom_nav_bar.dart';
 import 'package:my_perfect_quran/services/translation_service.dart';
 import 'package:my_perfect_quran/core/services/settings_service.dart';
+import 'package:my_perfect_quran/core/theme/typography.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -49,6 +50,15 @@ class _MyQuranAppState extends State<MyQuranApp> {
         return MaterialApp(
           navigatorKey: navigatorKey,
           debugShowCheckedModeBanner: false,
+          theme: ThemeData(
+            useMaterial3: true,
+            fontFamily: AppTypography.englishFont,
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: const Color(0xFF1E5B30),
+              primary: const Color(0xFF1E5B30),
+            ),
+            scaffoldBackgroundColor: Colors.white,
+          ),
           scrollBehavior: Platform.isLinux
               ? const MaterialScrollBehavior().copyWith(scrollbars: false)
               : null,

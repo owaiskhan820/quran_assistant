@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:qcf_quran/qcf_quran.dart';
+import 'package:my_perfect_quran/core/theme/typography.dart';
 
 class MyCustomHeaderWidget extends StatelessWidget {
   final int surahNumber;
@@ -23,10 +24,9 @@ class MyCustomHeaderWidget extends StatelessWidget {
           fit: BoxFit.scaleDown,
           child: Text(
             "سُورَة ${getSurahName(surahNumber)}",
-            style: TextStyle(
+            style: AppTypography.surahHeader(
+              fontSize: 20.sp,
               color: const Color(0xFF1E5B30),
-              fontSize: 20.sp, // Dropped slightly from 22 to 20
-              fontFamily: 'Amiri',
             ),
           ),
         ),

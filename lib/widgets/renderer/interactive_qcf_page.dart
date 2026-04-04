@@ -216,45 +216,31 @@ class _InteractiveQcfPageState extends State<InteractiveQcfPage> {
       return Center(child: Text('Invalid page number: ${widget.pageNumber}'));
     }
 
-    final bool isSpecialPage = widget.pageNumber == 1 || widget.pageNumber == 2;
-
     return Column(
       children: [
         Expanded(
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              return SingleChildScrollView(
-                padding: EdgeInsets.only(bottom: 120.h),
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(
-                    minHeight: isSpecialPage ? constraints.maxHeight - 120.h : 0,
-                  ),
-                  child: Center(
-                    child: Column(
-                      mainAxisAlignment: isSpecialPage ? MainAxisAlignment.center : MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Text.rich(
-                          TextSpan(children: _cachedSpans ?? []),
-                          locale: const Locale("ar"),
-                          textAlign: TextAlign.center,
-                          textDirection: TextDirection.rtl,
-                          style: TextStyle(
-                            fontFamily: _pageFont,
-                            package: 'qcf_quran',
-                            fontSize: _baseFontSize,
-                            color: widget.theme.verseTextColor,
-                            height: widget.theme.verseHeight * widget.heightScale,
-                            letterSpacing: widget.theme.letterSpacing,
-                            wordSpacing: widget.theme.wordSpacing,
-                          ),
-                        ),
-                      ],
-                    ),
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text.rich(
+                  TextSpan(children: _cachedSpans ?? []),
+                  locale: const Locale("ar"),
+                  textAlign: TextAlign.center,
+                  textDirection: TextDirection.rtl,
+                  style: TextStyle(
+                    fontFamily: _pageFont,
+                    package: 'qcf_quran',
+                    fontSize: _baseFontSize,
+                    color: widget.theme.verseTextColor,
+                    height: widget.theme.verseHeight * widget.heightScale,
+                    letterSpacing: widget.theme.letterSpacing,
+                    wordSpacing: widget.theme.wordSpacing,
                   ),
                 ),
-              );
-            },
+              ],
+            ),
           ),
         ),
       ],

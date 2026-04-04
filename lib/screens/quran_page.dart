@@ -4,6 +4,9 @@ import 'package:my_perfect_quran/widgets/mushaf_view.dart';
 import 'package:my_perfect_quran/widgets/mushaf_header.dart';
 import 'package:qcf_quran/qcf_quran.dart';
 import 'package:my_perfect_quran/core/navigation/nav_controller.dart';
+import 'package:my_perfect_quran/core/services/settings_service.dart';
+import 'package:my_perfect_quran/l10n/translation_constants.dart';
+import 'package:my_perfect_quran/core/theme/typography.dart';
 
 class QuranPage extends StatefulWidget {
   const QuranPage({super.key});
@@ -13,9 +16,21 @@ class QuranPage extends StatefulWidget {
 }
 
 class QuranPageState extends State<QuranPage> {
-  int currentPage = 1;
-  final PageController _pageController = PageController();
+  late int currentPage;
+  late PageController _pageController;
   (int, int)? _highlightedAyah;
+
+  @override
+  void initState() {
+    super.initState();
+    currentPage = SettingsService.instance.getLastPage();
+    _pageController = PageController(initialPage: currentPage - 1);
+    SettingsService.instance.localeNotifier.addListener(_onLocaleChanged);
+  }
+
+  void _onLocaleChanged() {
+    if (mounted) setState(() {});
+  }
 
   void onSearchPage(int page) {
     if (page < 1 || page > 604) return;
@@ -33,13 +48,21 @@ class QuranPageState extends State<QuranPage> {
   }
 
   String get _currentSurahName {
+    final lang = SettingsService.instance.translationLang;
     final data = getPageData(currentPage);
     if (data.isEmpty) return "Unknown";
     final surahNum = data[0]['surah'];
+    
+    if (lang == 'ur') {
+      final urduName = TranslationConstants.getString(lang, 'surah_$surahNum');
+      final urduNum = TranslationConstants.toUrduDigits(surahNum);
+      return "$urduNum. $urduName";
+    }
     return "$surahNum. ${getSurahName(surahNum)}";
   }
 
   String get _currentJuzInfo {
+    final lang = SettingsService.instance.translationLang;
     const juzStartPages = [
       1, 22, 42, 62, 82, 102, 122, 142, 162, 182,
       202, 222, 242, 262, 282, 302, 322, 342, 362, 382,
@@ -50,6 +73,12 @@ class QuranPageState extends State<QuranPage> {
       if (currentPage >= juzStartPages[i]) {
         currentJuz = i + 1;
       }
+    }
+    
+    if (lang == 'ur') {
+      final paraLabel = TranslationConstants.getString(lang, 'para');
+      final paraNum = TranslationConstants.toUrduDigits(currentJuz);
+      return "$paraLabel $paraNum";
     }
     return "Juz $currentJuz";
   }
@@ -69,6 +98,7 @@ class QuranPageState extends State<QuranPage> {
 
   @override
   void dispose() {
+    SettingsService.instance.localeNotifier.removeListener(_onLocaleChanged);
     _pageController.dispose();
     super.dispose();
   }
@@ -80,9 +110,9 @@ class QuranPageState extends State<QuranPage> {
     final mainContent = Stack(
       children: [
         Positioned(
-          top: headerH + 10.h,
-          left: 11,
-          right: 11,
+          top: headerH + 20.h,
+          left: 12,
+          right: 12,
           bottom: 0,
           child: GestureDetector(
             behavior: HitTestBehavior.translucent,
@@ -100,13 +130,14 @@ class QuranPageState extends State<QuranPage> {
               showBottomNavNotifier.value = false;
             },
             child: MushafView(
-              initialPage: 3,
+              initialPage: currentPage,
               controller: _pageController,
               highlightedAyah: _highlightedAyah,
               onPageChanged: (page) {
                 setState(() {
                   currentPage = page;
                 });
+                SettingsService.instance.setLastPage(page);
               },
               onAyahLongPress: (surah, ayah) {
                 showBottomNavNotifier.value = true;
@@ -149,11 +180,16 @@ class QuranPageState extends State<QuranPage> {
                   ],
                 ),
                 child: Text(
-                  '$currentPage',
+                  SettingsService.instance.translationLang == 'ur' 
+                      ? TranslationConstants.toUrduDigits(currentPage) 
+                      : '$currentPage',
                   style: TextStyle(
                     color: const Color(0xFF1E5B30),
                     fontSize: 13.sp,
                     fontWeight: FontWeight.w600,
+                    fontFamily: SettingsService.instance.translationLang == 'ur' 
+                        ? AppTypography.urduFont 
+                        : null,
                   ),
                 ),
               ),

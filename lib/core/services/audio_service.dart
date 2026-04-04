@@ -8,7 +8,7 @@ class AudioService {
   static AudioService get instance => _instance;
 
   final AudioPlayer _player = AudioPlayer();
-  final ConcatenatingAudioSource _playlist = ConcatenatingAudioSource(children: []);
+
 
   final Map<String, int> qariMap = {
   'AbdulBaset AbdulSamad (Mujawwad)': 1,
@@ -35,8 +35,6 @@ class AudioService {
   final ValueNotifier<ProcessingState> processingState = ValueNotifier(ProcessingState.idle);
 
   AudioService._internal() {
-    _player.setAudioSource(_playlist);
-
     _player.playerStateStream.listen((state) {
       isPlaying.value = state.playing;
       isBuffering.value = state.processingState == ProcessingState.buffering || 
@@ -48,38 +46,8 @@ class AudioService {
       }
     });
 
-    _player.currentIndexStream.listen((index) async {
-       if (index != null && index > 0) {
-           if (currentSurah.value == null || currentAyah.value == null) return;
-           int s = currentSurah.value!;
-           int a = currentAyah.value! + 1;
-           if (a > getVerseCount(s)) { 
-             s++; 
-             a = 1; 
-           }
-           
-           if (s <= 114) {
-             currentSurah.value = s;
-             currentAyah.value = a;
-             
-             int nextS = s;
-             int nextA = a + 1;
-             if (nextA > getVerseCount(nextS)) { 
-               nextS++; 
-               nextA = 1; 
-             }
-             if (nextS <= 114) {
-               final url = await QuranApiService.getAyahAudioUrl(nextS, nextA, recitationId: _currentRecitationId);
-               if (url != null) {
-                 await _playlist.add(AudioSource.uri(Uri.parse(url)));
-               }
-             }
-           }
-       }
-    });
-
     _player.playbackEventStream.listen((event) {}, onError: (Object e, StackTrace st) {
-
+      debugPrint('Audio playback error: $e');
     });
   }
 
@@ -108,17 +76,21 @@ class AudioService {
     try {
       if (recitationId != null) _currentRecitationId = recitationId;
       
-      await _playlist.clear();
+      // 1. Force stop current playback to avoid "stickiness"
+      await _player.stop();
+      
       currentSurah.value = surah;
       currentAyah.value = ayah;
-      
       isBuffering.value = true;
 
       final url = await QuranApiService.getAyahAudioUrl(surah, ayah, recitationId: _currentRecitationId);
       
       if (url != null) {
-        await _playlist.add(AudioSource.uri(Uri.parse(url)));
-        await _player.seek(Duration.zero, index: 0);
+        // 2. Use direct AudioSource instead of a Playlist for stability
+        await _player.setAudioSource(
+          AudioSource.uri(Uri.parse(url)),
+          preload: true,
+        );
         _player.play();
         return true;
       } else {
@@ -127,6 +99,7 @@ class AudioService {
         return false;
       }
     } catch (e) {
+      debugPrint('Error playing ayah audio: $e');
       isBuffering.value = false;
       await stop();
       return false;
@@ -149,12 +122,17 @@ class AudioService {
 
       final url = "https://audio.qurancdn.com/wbw/${s}_${a}_$w.mp3";
 
-      
+      // 1. Force stop current playback
       await _player.stop();
-      await _player.setUrl(url);
+      
+      // 2. Set new source with try-catch
+      await _player.setAudioSource(
+        AudioSource.uri(Uri.parse(url)),
+        preload: true,
+      );
       await _player.play();
     } catch (e) {
-      // ignore empty catch
+      debugPrint('Error playing word audio: $e');
     }
   }
 
