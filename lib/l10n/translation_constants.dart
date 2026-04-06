@@ -13,6 +13,32 @@ class TranslationConstants {
       'language': 'Language',
       'ayah': 'Ayah',
       'para': 'Juz',
+      'search': 'Search...',
+      'surahNo': 'Surah No.',
+      'startsAt': 'Starts at Page',
+      'enterPage': 'Enter page number (1-604)',
+      'goToPage': 'Go to Page',
+      'featureSoon': 'Feature coming soon',
+      'selectQari': 'Select Default Reciter',
+      'manageTranslations': 'Manage Translations',
+      'downloadOffline': 'Download for offline use',
+      'share': 'Share with others',
+      'support': 'Support & Feedback',
+      'meaning': 'Meaning',
+      'explanation': 'Explanation',
+      'urduScript': 'Urdu Script',
+      'qari_names': {
+        '1': 'AbdulBaset AbdulSamad (Mujawwad)',
+        '2': 'AbdulBaset AbdulSamad (Murattal)',
+        '3': 'Abdur-Rahman as-Sudais',
+        '4': 'Abu Bakr al-Shatri',
+        '5': 'Hani ar-Rifai',
+        '7': 'Mishari Rashid al-`Afasy',
+        '8': 'Mohamed Siddiq al-Minshawi (Mujawwad)',
+        '9': 'Mohamed Siddiq al-Minshawi (Murattal)',
+        '11': 'Mohamed al-Tablawi',
+        '12': 'Mahmoud Khalil Al-Husary (Muallim)',
+      }
     },
     'ur': {
       'more': 'مزید',
@@ -20,13 +46,39 @@ class TranslationConstants {
       'index': 'فہرست',
       'scan': 'اسکین',
       'juz': 'پارہ',
-      'surah': 'سورہ',
+      'surah': 'سورت',
       'page': 'صفحہ',
       'defaultQari': 'منتخب قاری',
       'settings': 'ترتیبات',
       'language': 'زبان',
       'ayah': 'آیت',
       'para': 'پارہ',
+      'search': 'تلاش کریں...',
+      'surahNo': 'سورت نمبر',
+      'startsAt': 'شروع ہوتا ہے صفحہ',
+      'enterPage': 'صفحہ نمبر درج کریں (1-604)',
+      'goToPage': 'صفحہ پر جائیں',
+      'featureSoon': 'یہ فیچر جلد آ رہا ہے',
+      'selectQari': 'منتخب قاری کا انتخاب کریں',
+      'manageTranslations': 'ترجمے',
+      'downloadOffline': 'آف لائن استعمال کے لیے',
+      'share': 'شیئر کریں',
+      'support': 'مدد اور تاثرات',
+      'meaning': 'معنی',
+      'explanation': 'تشریح',
+      'urduScript': 'اردو رسم الخط',
+      'qari_names': {
+        '1': 'عبد الباسط عبد الصمد (مجود)',
+        '2': 'عبد الباسط عبد الصمد (مرتل)',
+        '3': 'عبد الرحمن السدیس',
+        '4': 'ابو بكر الشاطری',
+        '5': 'ہانی الرفاعی',
+        '7': 'مشاری راشد العفاسی',
+        '8': 'محمد صدیق المنشاوی (مجود)',
+        '9': 'محمد صدیق المنشاوی (مرتل)',
+        '11': 'محمد الطبلاوی',
+        '12': 'محمود خلیل الحصری (معلم)',
+      },
       'surah_names': {
         '1': 'الفاتحہ', '2': 'البقرہ', '3': 'آل عمران', '4': 'النساء', '5': 'المائدہ',
         '6': 'الانعام', '7': 'الاعراف', '8': 'الانفال', '9': 'التوبہ', '10': 'یونس',
@@ -58,9 +110,17 @@ class TranslationConstants {
   static String getString(String langCode, String key) {
     if (key.startsWith('surah_')) {
       final surahIndex = key.replaceAll('surah_', '');
-      final suratMap = map[langCode]?['surah_names'];
-      if (suratMap is Map) {
-        return suratMap[surahIndex] ?? key;
+      final surahMap = map[langCode]?['surah_names'];
+      if (surahMap is Map) {
+        return surahMap[surahIndex] ?? key;
+      }
+      return key;
+    }
+    if (key.startsWith('qari_')) {
+      final qariId = key.replaceAll('qari_', '');
+      final qariMap = map[langCode]?['qari_names'];
+      if (qariMap is Map) {
+        return qariMap[qariId] ?? key;
       }
       return key;
     }

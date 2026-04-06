@@ -4,10 +4,10 @@ import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image/image.dart' as img;
-import 'package:my_perfect_quran/services/ai_service.dart';
+import 'package:quran_assistant/services/ai_service.dart';
 
-import 'package:my_perfect_quran/helpers/quran_navigation_helper.dart';
-import 'package:my_perfect_quran/core/services/quran_api_service.dart';
+import 'package:quran_assistant/helpers/quran_navigation_helper.dart';
+import 'package:quran_assistant/core/services/quran_api_service.dart';
 
 class ScanCameraScreen extends StatefulWidget {
   const ScanCameraScreen({super.key});
@@ -121,7 +121,7 @@ class _ScanCameraScreenState extends State<ScanCameraScreen> {
         Navigator.pop(context); 
         
         // Use the integrated navigation and highlight method
-        jumpToAyah(surah, ayah);
+        QuranNavigationHelper.jumpToAyah(surah, ayah);
       }
     } catch (e) {
 

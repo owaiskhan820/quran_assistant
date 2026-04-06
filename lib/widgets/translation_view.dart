@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:my_perfect_quran/services/translation_service.dart';
-import 'package:my_perfect_quran/core/theme/typography.dart';
+import 'package:quran_assistant/services/translation_service.dart';
+import 'package:quran_assistant/core/theme/typography.dart';
 
 class TranslationView extends StatelessWidget {
   final int surahNumber;

@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "com.example" "\0"
-            VALUE "FileDescription", "my_perfect_quran" "\0"
+            VALUE "FileDescription", "Quran Assistant" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "my_perfect_quran" "\0"
+            VALUE "InternalName", "quran_assistant" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2026 com.example. All rights reserved." "\0"
-            VALUE "OriginalFilename", "my_perfect_quran.exe" "\0"
-            VALUE "ProductName", "my_perfect_quran" "\0"
+            VALUE "OriginalFilename", "quran_assistant.exe" "\0"
+            VALUE "ProductName", "Quran Assistant" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

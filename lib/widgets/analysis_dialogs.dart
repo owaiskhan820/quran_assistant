@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:my_perfect_quran/core/services/audio_service.dart';
-import 'package:my_perfect_quran/core/services/settings_service.dart';
-import 'package:my_perfect_quran/widgets/translation_view.dart';
+import 'package:quran_assistant/core/services/audio_service.dart';
+import 'package:quran_assistant/core/services/settings_service.dart';
+import 'package:quran_assistant/widgets/translation_view.dart';
 import 'package:qcf_quran/qcf_quran.dart';
-import 'package:my_perfect_quran/core/theme/typography.dart';
-import 'package:my_perfect_quran/helpers/quran_navigation_helper.dart' as helper;
-import 'package:my_perfect_quran/l10n/translation_constants.dart';
+import 'package:quran_assistant/core/theme/typography.dart';
+import 'package:quran_assistant/l10n/translation_constants.dart';
 
 class WordAnalysisDialog extends StatefulWidget {
   final String word;
@@ -30,9 +29,21 @@ class WordAnalysisDialog extends StatefulWidget {
 }
 
 class _WordAnalysisDialogState extends State<WordAnalysisDialog> {
-  String _selectedOption = "Urdu Script";
-  final List<String> _options = ["Meaning", "Explanation", "Urdu Script"];
+  String _selectedOption = "";
+  List<String> _options = [];
   bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    final lang = SettingsService.instance.translationLang;
+    _options = [
+      TranslationConstants.getString(lang, 'meaning'),
+      TranslationConstants.getString(lang, 'explanation'),
+      TranslationConstants.getString(lang, 'urduScript'),
+    ];
+    _selectedOption = _options[2]; // Default to Urdu Script
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -57,29 +68,39 @@ class _WordAnalysisDialogState extends State<WordAnalysisDialog> {
                 borderRadius: BorderRadius.circular(12.r),
                 border: Border.all(color: const Color(0xFF1E5B30).withValues(alpha: 0.1)),
               ),
-              child: DropdownButtonHideUnderline(
-                child: DropdownButton<String>(
-                  value: _selectedOption,
-                  isExpanded: true,
-                  icon: const Icon(Icons.keyboard_arrow_down, color: Color(0xFF1E5B30)),
-                  items: _options.map((String option) {
-                    return DropdownMenuItem<String>(
-                      value: option,
-                      child: Text(
-                        option,
-                        style: AppTypography.englishBase.copyWith(
-                          fontSize: 14.sp,
-                          color: const Color(0xFF1E5B30),
-                        ),
+              child: ValueListenableBuilder<String>(
+                valueListenable: SettingsService.instance.localeNotifier,
+                builder: (context, lang, _) {
+                  final isUrdu = lang == 'ur';
+                  return Directionality(
+                    textDirection: isUrdu ? TextDirection.rtl : TextDirection.ltr,
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton<String>(
+                        value: _selectedOption,
+                        isExpanded: true,
+                        icon: const Icon(Icons.keyboard_arrow_down, color: Color(0xFF1E5B30)),
+                        items: _options.map((String option) {
+                          return DropdownMenuItem<String>(
+                            value: option,
+                            child: Text(
+                              option,
+                              style: TextStyle(
+                                fontSize: 14.sp,
+                                color: const Color(0xFF1E5B30),
+                                fontFamily: isUrdu ? AppTypography.urduFont : AppTypography.englishFont,
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                        onChanged: (String? newValue) {
+                          if (newValue != null) {
+                            setState(() => _selectedOption = newValue);
+                          }
+                        },
                       ),
-                    );
-                  }).toList(),
-                  onChanged: (String? newValue) {
-                    if (newValue != null) {
-                      setState(() => _selectedOption = newValue);
-                    }
-                  },
-                ),
+                    ),
+                  );
+                },
               ),
             ),
             const Spacer(),
@@ -122,9 +143,9 @@ class _WordAnalysisDialogState extends State<WordAnalysisDialog> {
                     )
                   : const Icon(Icons.play_arrow, color: Colors.white, size: 20),
               label: Text(
-                _isLoading 
-                  ? (SettingsService.instance.translationLang == 'ur' ? "لوڈ ہو رہا ہے..." : "Loading...")
-                  : (SettingsService.instance.translationLang == 'ur' ? "سنیں" : "Listen"),
+                _isLoading
+                    ? (SettingsService.instance.translationLang == 'ur' ? "لوڈ ہو رہا ہے..." : "Loading...")
+                    : (SettingsService.instance.translationLang == 'ur' ? "سنیں" : "Listen"),
                 style: TextStyle(
                   fontSize: 14.sp,
                   fontWeight: FontWeight.bold,
@@ -361,17 +382,24 @@ class _AyahAnalysisDialogState extends State<AyahAnalysisDialog> {
                             final messenger = ScaffoldMessenger.of(context);
                             final success = await AudioService.instance.playAyah(_currentSurah, _currentVerse, recitationId: val);
                             if (!success) {
+                              final lang = SettingsService.instance.translationLang;
+                              final err = lang == 'ur' ? 'اس قاری کے لیے آڈیو دستیاب نہیں ہے۔ براہ کرم دوسرا آزمائیں۔' : 'Audio not available for this Reciter. Please try another.';
                               messenger.showSnackBar(
-                                const SnackBar(
-                                  content: Text('Audio not available for this Reciter. Please try another.'),
+                                SnackBar(
+                                  content: Text(
+                                    err,
+                                    style: lang == 'ur' ? AppTypography.urduBase.copyWith(fontSize: 14.sp) : null,
+                                  ),
                                   backgroundColor: Colors.redAccent,
-                                  duration: Duration(seconds: 2),
+                                  duration: const Duration(seconds: 2),
                                 ),
                               );
                             }
                           }
                         },
                         items: AudioService.instance.qariMap.entries.map((entry) {
+                          final lang = SettingsService.instance.translationLang;
+                          final isUrdu = lang == 'ur';
                           return DropdownMenuItem<int>(
                             value: entry.value,
                             child: Row(
@@ -380,10 +408,15 @@ class _AyahAnalysisDialogState extends State<AyahAnalysisDialog> {
                                 SizedBox(width: 8.w),
                                  Expanded(
                                   child: Text(
-                                    entry.key,
+                                    TranslationConstants.getString(lang, 'qari_${entry.value}'),
                                     overflow: TextOverflow.ellipsis,
                                     maxLines: 1,
-                                    style: AppTypography.englishBase.copyWith(fontSize: 13.sp),
+                                    style: TextStyle(
+                                      fontSize: 13.sp,
+                                      fontFamily: isUrdu ? AppTypography.urduFont : AppTypography.englishFont,
+                                      fontWeight: FontWeight.w500,
+                                      color: const Color(0xFF1E5B30),
+                                    ),
                                   ),
                                 ),
                               ],

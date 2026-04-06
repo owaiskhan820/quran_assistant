@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:qcf_quran/qcf_quran.dart';
-import 'package:my_perfect_quran/widgets/renderer/interactive_pageview_quran.dart';
-import 'package:my_perfect_quran/widgets/analysis_dialogs.dart';
-import 'package:my_perfect_quran/core/navigation/nav_controller.dart';
-import 'package:my_perfect_quran/core/services/audio_service.dart';
+import 'package:quran_assistant/widgets/renderer/interactive_pageview_quran.dart';
+import 'package:quran_assistant/widgets/analysis_dialogs.dart';
+import 'package:quran_assistant/core/navigation/nav_controller.dart';
+import 'package:quran_assistant/core/services/audio_service.dart';
 
 class MushafView extends StatelessWidget {
   final int initialPage;

@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:my_perfect_quran/core/navigation/nav_controller.dart';
-import 'package:my_perfect_quran/core/services/settings_service.dart';
-import 'package:my_perfect_quran/core/theme/typography.dart';
+import 'package:quran_assistant/core/services/settings_service.dart';
+import 'package:quran_assistant/core/theme/typography.dart';
 
 class MushafHeader extends StatelessWidget {
   final String surahName;

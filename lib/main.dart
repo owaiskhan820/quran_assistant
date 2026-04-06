@@ -2,17 +2,17 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:my_perfect_quran/helpers/desktop_helper.dart';
-import 'package:my_perfect_quran/services/ai_service.dart';
-import 'package:my_perfect_quran/core/navigation.dart';
-import 'package:my_perfect_quran/core/navigation/nav_controller.dart';
-import 'package:my_perfect_quran/screens/quran_page.dart';
-import 'package:my_perfect_quran/screens/index_page.dart';
-import 'package:my_perfect_quran/screens/more_page.dart';
-import 'package:my_perfect_quran/widgets/custom_bottom_nav_bar.dart';
-import 'package:my_perfect_quran/services/translation_service.dart';
-import 'package:my_perfect_quran/core/services/settings_service.dart';
-import 'package:my_perfect_quran/core/theme/typography.dart';
+import 'package:quran_assistant/helpers/desktop_helper.dart';
+import 'package:quran_assistant/services/ai_service.dart';
+import 'package:quran_assistant/core/navigation.dart';
+import 'package:quran_assistant/core/navigation/nav_controller.dart';
+import 'package:quran_assistant/screens/quran_page.dart';
+import 'package:quran_assistant/screens/index_page.dart';
+import 'package:quran_assistant/screens/more_page.dart';
+import 'package:quran_assistant/widgets/custom_bottom_nav_bar.dart';
+import 'package:quran_assistant/services/translation_service.dart';
+import 'package:quran_assistant/core/services/settings_service.dart';
+import 'package:quran_assistant/core/theme/typography.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -31,23 +31,24 @@ void main() async {
   
   await TranslationService.instance.loadLocalTranslations();
 
-  runApp(const MyQuranApp());
+  runApp(const QuranAssistantApp());
 }
 
-class MyQuranApp extends StatefulWidget {
-  const MyQuranApp({super.key});
+class QuranAssistantApp extends StatefulWidget {
+  const QuranAssistantApp({super.key});
 
   @override
-  State<MyQuranApp> createState() => _MyQuranAppState();
+  State<QuranAssistantApp> createState() => _QuranAssistantAppState();
 }
 
-class _MyQuranAppState extends State<MyQuranApp> {
+class _QuranAssistantAppState extends State<QuranAssistantApp> {
   @override
   Widget build(BuildContext context) {
     return ScreenUtilInit(
       designSize: const Size(360, 690),
       builder: (context, child) {
         return MaterialApp(
+          title: 'Quran Assistant',
           navigatorKey: navigatorKey,
           debugShowCheckedModeBanner: false,
           theme: ThemeData(

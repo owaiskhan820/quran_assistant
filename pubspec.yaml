@@ -1,4 +1,4 @@
-name: my_perfect_quran
+name: quran_assistant
 description: A new Flutter project.
 publish_to: 'none'
 version: 1.0.0+1
@@ -29,7 +29,13 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^3.0.0
+  flutter_launcher_icons: ^0.13.1
 
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/logo/logo.png"
+  min_sdk_android: 21
 
 flutter:
   uses-material-design: true

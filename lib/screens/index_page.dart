@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:qcf_quran/qcf_quran.dart';
-import 'package:my_perfect_quran/core/navigation.dart';
-import 'package:my_perfect_quran/core/navigation/nav_controller.dart';
-import 'package:my_perfect_quran/screens/quran_page.dart';
-import 'package:my_perfect_quran/core/theme/typography.dart';
+import 'package:quran_assistant/core/navigation.dart';
+import 'package:quran_assistant/core/navigation/nav_controller.dart';
+import 'package:quran_assistant/screens/quran_page.dart';
+import 'package:quran_assistant/core/theme/typography.dart';
+import 'package:quran_assistant/core/services/settings_service.dart';
+import 'package:quran_assistant/l10n/translation_constants.dart';
+import 'package:quran_assistant/helpers/quran_navigation_helper.dart';
+
 
 class IndexPage extends StatefulWidget {
   const IndexPage({super.key});
@@ -35,63 +39,83 @@ class _IndexPageState extends State<IndexPage> {
 
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: 3,
-      child: Scaffold(
-        backgroundColor: const Color(0xFFF8F4ED),
-        appBar: AppBar(
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          centerTitle: true,
-          title: Text(
-            'Index',
-            style: AppTypography.englishBase.copyWith(
-              color: const Color(0xFF1E5B30),
-              fontSize: 22.sp,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          bottom: PreferredSize(
-            preferredSize: Size.fromHeight(48.h),
-            child: TabBar(
-              indicatorColor: const Color(0xFF2C6B4A),
-              indicatorWeight: 3.h,
-              labelColor: const Color(0xFF2C6B4A),
-              unselectedLabelColor: Colors.grey.shade600,
-              labelStyle: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold),
-              tabs: const [
-                Tab(text: 'Surah'),
-                Tab(text: 'Juz'),
-                Tab(text: 'Page'),
-              ],
-            ),
-          ),
-        ),
-        body: Column(
-          children: [
-            Padding(
-              padding: EdgeInsets.fromLTRB(20.w, 15.h, 20.w, 10.h),
-              child: IndexSearchBar(
-                controller: _searchController,
-                onChanged: (val) => setState(() => _searchQuery = val),
+    return ValueListenableBuilder<String>(
+      valueListenable: SettingsService.instance.localeNotifier,
+      builder: (context, lang, _) {
+        final isUrdu = lang == 'ur';
+        final textDirection = isUrdu ? TextDirection.rtl : TextDirection.ltr;
+        final urduStyle = AppTypography.urduBase.copyWith(fontSize: 18.sp);
+
+        return Directionality(
+          textDirection: textDirection,
+          child: DefaultTabController(
+            length: 3,
+            child: Scaffold(
+              backgroundColor: const Color(0xFFF8F4ED),
+              appBar: AppBar(
+                backgroundColor: Colors.transparent,
+                elevation: 0,
+                centerTitle: true,
+                title: Text(
+                  TranslationConstants.getString(lang, 'index'),
+                  style: isUrdu 
+                    ? urduStyle.copyWith(fontSize: 22.sp, fontWeight: FontWeight.bold)
+                    : AppTypography.englishBase.copyWith(
+                        color: const Color(0xFF1E5B30),
+                        fontSize: 22.sp,
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+                bottom: PreferredSize(
+                  preferredSize: Size.fromHeight(48.h),
+                  child: TabBar(
+                    indicatorColor: const Color(0xFF2C6B4A),
+                    indicatorWeight: 3.h,
+                    labelColor: const Color(0xFF2C6B4A),
+                    unselectedLabelColor: Colors.grey.shade600,
+                    labelStyle: TextStyle(
+                      fontSize: isUrdu ? 16.sp : 14.sp, 
+                      fontWeight: FontWeight.bold,
+                      fontFamily: isUrdu ? AppTypography.urduFont : null,
+                    ),
+                    tabs: [
+                      Tab(text: TranslationConstants.getString(lang, 'surah')),
+                      Tab(text: TranslationConstants.getString(lang, 'para')),
+                      Tab(text: TranslationConstants.getString(lang, 'page')),
+                    ],
+                  ),
+                ),
               ),
-            ),
-            Expanded(
-              child: TabBarView(
+              body: Column(
                 children: [
-                  _buildSurahList(),
-                  _buildJuzList(),
-                  _buildPageSearch(),
+                  Padding(
+                    padding: EdgeInsets.fromLTRB(20.w, 15.h, 20.w, 10.h),
+                    child: IndexSearchBar(
+                      controller: _searchController,
+                      onChanged: (val) => setState(() => _searchQuery = val),
+                      hintText: TranslationConstants.getString(lang, 'search'),
+                      isUrdu: isUrdu,
+                    ),
+                  ),
+                  Expanded(
+                    child: TabBarView(
+                      children: [
+                        _buildSurahList(lang, isUrdu, urduStyle),
+                        _buildJuzList(lang, isUrdu, urduStyle),
+                        _buildPageSearch(lang, isUrdu, urduStyle),
+                      ],
+                    ),
+                  ),
                 ],
               ),
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 
-  Widget _buildSurahList() {
+  Widget _buildSurahList(String lang, bool isUrdu, TextStyle urduStyle) {
     final List<int> filteredSurahs = List.generate(114, (i) => i + 1).where((s) {
       if (_searchQuery.isEmpty) return true;
       final name = getSurahName(s).toLowerCase();
@@ -103,26 +127,32 @@ class _IndexPageState extends State<IndexPage> {
       itemCount: filteredSurahs.length,
       itemBuilder: (context, index) {
         final surahNum = filteredSurahs[index];
+        final surahName = isUrdu 
+          ? TranslationConstants.getString(lang, 'surah_$surahNum')
+          : getSurahName(surahNum);
+          
         return _buildIndexCard(
-          index: surahNum.toString(),
-          title: getSurahName(surahNum),
-          subtitle: "Surah No. $surahNum",
+          index: isUrdu ? TranslationConstants.toUrduDigits(surahNum) : surahNum.toString(),
+          title: surahName,
+          subtitle: isUrdu 
+            ? "${TranslationConstants.getString(lang, 'surahNo')} ${TranslationConstants.toUrduDigits(surahNum)}"
+            : "Surah No. $surahNum",
           onTap: () {
-            // Need to find start page of surah
-            // In qcf_quran, maybe we can get it from somewhere or hardcode it
-            // For now, I'll use a placeholder or find a better way
-            final page = _getSurahStartPage(surahNum);
-            _navigateToPage(page);
+            final page = QuranNavigationHelper.getPageNumber(surahNum, 1);
+            _navigateToPage(page > 0 ? page : 1);
           },
+          isUrdu: isUrdu,
+          urduStyle: urduStyle,
         );
       },
     );
   }
 
-  Widget _buildJuzList() {
+  Widget _buildJuzList(String lang, bool isUrdu, TextStyle urduStyle) {
     final List<int> filteredJuz = List.generate(30, (i) => i + 1).where((j) {
       if (_searchQuery.isEmpty) return true;
-      return j.toString().contains(_searchQuery) || "juz $j".contains(_searchQuery.toLowerCase());
+      return j.toString().contains(_searchQuery) || 
+             TranslationConstants.getString(lang, 'para').toLowerCase().contains(_searchQuery.toLowerCase());
     }).toList();
 
     return ListView.builder(
@@ -130,19 +160,25 @@ class _IndexPageState extends State<IndexPage> {
       itemCount: filteredJuz.length,
       itemBuilder: (context, index) {
         final juzNum = filteredJuz[index];
+        final startPage = _getJuzStartPage(juzNum);
+        
         return _buildIndexCard(
-          index: juzNum.toString(),
-          title: "Juz $juzNum",
-          subtitle: "Starts at Page ${_getJuzStartPage(juzNum)}",
-          onTap: () => _navigateToPage(_getJuzStartPage(juzNum)),
+          index: isUrdu ? TranslationConstants.toUrduDigits(juzNum) : juzNum.toString(),
+          title: isUrdu 
+            ? "${TranslationConstants.getString(lang, 'para')} ${TranslationConstants.toUrduDigits(juzNum)}"
+            : "Juz $juzNum",
+          subtitle: isUrdu 
+            ? "${TranslationConstants.getString(lang, 'startsAt')} ${TranslationConstants.toUrduDigits(startPage)}"
+            : "Starts at Page $startPage",
+          onTap: () => _navigateToPage(startPage),
+          isUrdu: isUrdu,
+          urduStyle: urduStyle,
         );
       },
     );
   }
 
-  Widget _buildPageSearch() {
-    // Page tab is just a way to jump to page if nothing else is requested
-    // But since search bar is global, we can use it to jump to page
+  Widget _buildPageSearch(String lang, bool isUrdu, TextStyle urduStyle) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -150,8 +186,8 @@ class _IndexPageState extends State<IndexPage> {
           Icon(Icons.auto_stories_rounded, size: 80.r, color: const Color(0xFF2C6B4A).withValues(alpha: 0.2)),
           SizedBox(height: 20.h),
           Text(
-            "Enter page number (1-604)",
-            style: TextStyle(fontSize: 16.sp, color: Colors.grey.shade600),
+            TranslationConstants.getString(lang, 'enterPage'),
+            style: isUrdu ? urduStyle : TextStyle(fontSize: 16.sp, color: Colors.grey.shade600),
           ),
           if (_searchQuery.isNotEmpty && int.tryParse(_searchQuery) != null)
             Padding(
@@ -168,7 +204,12 @@ class _IndexPageState extends State<IndexPage> {
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.r)),
                 ),
-                child: Text("Go to Page $_searchQuery"),
+                child: Text(
+                  isUrdu 
+                    ? "${TranslationConstants.getString(lang, 'goToPage')} ${TranslationConstants.toUrduDigits(int.parse(_searchQuery))}"
+                    : "Go to Page $_searchQuery",
+                  style: isUrdu ? urduStyle.copyWith(color: Colors.white, fontSize: 14.sp) : null,
+                ),
               ),
             ),
         ],
@@ -181,6 +222,8 @@ class _IndexPageState extends State<IndexPage> {
     required String title,
     required String subtitle,
     required VoidCallback onTap,
+    bool isUrdu = false,
+    TextStyle? urduStyle,
   }) {
     return Container(
       margin: EdgeInsets.only(bottom: 12.h),
@@ -211,27 +254,36 @@ class _IndexPageState extends State<IndexPage> {
               style: TextStyle(
                 color: const Color(0xFF2C6B4A),
                 fontWeight: FontWeight.bold,
-                fontSize: 14.sp,
+                fontSize: isUrdu ? 16.sp : 14.sp,
+                fontFamily: isUrdu ? AppTypography.urduFont : null,
               ),
             ),
           ),
         ),
         title: Text(
           title,
-          style: TextStyle(
-            fontSize: 16.sp,
-            fontWeight: FontWeight.w600,
-            color: Colors.black87,
-          ),
+          style: isUrdu 
+            ? urduStyle?.copyWith(fontWeight: FontWeight.w600, color: Colors.black87)
+            : TextStyle(
+                fontSize: 16.sp,
+                fontWeight: FontWeight.w600,
+                color: Colors.black87,
+              ),
         ),
         subtitle: Text(
           subtitle,
-          style: TextStyle(
-            fontSize: 12.sp,
-            color: Colors.grey.shade500,
-          ),
+          style: isUrdu 
+            ? urduStyle?.copyWith(fontSize: 14.sp, color: Colors.grey.shade500)
+            : TextStyle(
+                fontSize: 12.sp,
+                color: Colors.grey.shade500,
+              ),
         ),
-        trailing: Icon(Icons.arrow_forward_ios_rounded, size: 16.r, color: Colors.grey.shade400),
+        trailing: Icon(
+          isUrdu ? Icons.arrow_back_ios_rounded : Icons.arrow_forward_ios_rounded, 
+          size: 16.r, 
+          color: Colors.grey.shade400
+        ),
       ),
     );
   }
@@ -245,29 +297,21 @@ class _IndexPageState extends State<IndexPage> {
     return juzStartPages[juz - 1];
   }
 
-  int _getSurahStartPage(int surah) {
-    // This is more complex, usually we need a mapping.
-    // I'll check if qcf_quran provides this or I'll add a simplified map.
-    // For now, let's use a common Surah -> Page map for 15-line Mushaf.
-    // Or I can calculate it from some data.
-    // Placeholder for now, I'll try to find the real values if possible.
-    // Actually, I can use a small helper map for common ones.
-    final Map<int, int> surahToPage = {
-      1: 1, 2: 2, 3: 50, 4: 77, 5: 106, 6: 128, 7: 151, 8: 177, 9: 187, 10: 208,
-      18: 293, 36: 440, 55: 531, 67: 562, 114: 604
-    };
-    return surahToPage[surah] ?? (surah * 5); // Fallback
-  }
+
 }
 
 class IndexSearchBar extends StatelessWidget {
   final TextEditingController controller;
   final ValueChanged<String> onChanged;
+  final String hintText;
+  final bool isUrdu;
 
   const IndexSearchBar({
     super.key,
     required this.controller,
     required this.onChanged,
+    this.hintText = 'Search...',
+    this.isUrdu = false,
   });
 
   @override
@@ -287,9 +331,14 @@ class IndexSearchBar extends StatelessWidget {
       child: TextField(
         controller: controller,
         onChanged: onChanged,
+        textAlign: isUrdu ? TextAlign.right : TextAlign.left,
         decoration: InputDecoration(
-          hintText: 'Search...',
-          hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14.sp),
+          hintText: hintText,
+          hintStyle: TextStyle(
+            color: Colors.grey.shade400, 
+            fontSize: isUrdu ? 16.sp : 14.sp,
+            fontFamily: isUrdu ? AppTypography.urduFont : null,
+          ),
           border: InputBorder.none,
           contentPadding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
           suffixIcon: Icon(Icons.search, color: const Color(0xFF1E5B30), size: 22.r),

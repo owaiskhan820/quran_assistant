@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:my_perfect_quran/l10n/translation_constants.dart';
-import 'package:my_perfect_quran/core/services/settings_service.dart';
-import 'package:my_perfect_quran/core/theme/typography.dart';
-import 'package:my_perfect_quran/core/navigation/nav_controller.dart';
-import 'package:my_perfect_quran/widgets/scan_camera_screen.dart';
-import 'package:my_perfect_quran/core/navigation.dart';
+import 'package:quran_assistant/l10n/translation_constants.dart';
+import 'package:quran_assistant/core/services/settings_service.dart';
+import 'package:quran_assistant/core/theme/typography.dart';
+import 'package:quran_assistant/core/navigation/nav_controller.dart';
+import 'package:quran_assistant/widgets/scan_camera_screen.dart';
+import 'package:quran_assistant/core/navigation.dart';
 
 class CustomBottomNavBar extends StatelessWidget {
   const CustomBottomNavBar({super.key});
